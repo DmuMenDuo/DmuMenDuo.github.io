@@ -24,7 +24,7 @@ header h1 {
 
 @media only screen and (min-width: 768px) {
 	header {
-		margin-bottom: 4em;
+		/* margin-bottom: 4em; */
 	}
 }
 
