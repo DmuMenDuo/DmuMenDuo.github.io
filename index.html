@@ -26,7 +26,8 @@
 	
 	<!-- font-awesome -->
 	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-</head>
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 	<body>	
 		<!--Preloader-->
 <div id="preloader">
@@ -152,7 +153,7 @@
 						
 	
 		<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">		
-			使用Docker-Java动态的获取DockerContainer的运行结果		
+			使用Docker-Java动态的获取Container的log日志		
 		</a>
 	
 
@@ -161,13 +162,12 @@
 					
 						<p>
 							
-								docker-java 是 JAVA 操作Docker Remote API 的一个工具。最近项目需要，遇到一些问题，但是又没有什么文档、博客可查，所以总结一下自己遇到的问题。更多其他的问题可以参考他们的测试用例
-
-github 目前版本 3.0.13
-
-准备工作1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)123456789#查看配置文件位于哪里systemctl sh	
+								</p><p>docker-java 是 JAVA 操作Docker Remote API 的一个工具。最近项目需要读取容器的运行日志出来。记录一下自己遇到的问题。更多其他的问题可以参考他们的测试用例。</p>
+<blockquote>
+<p>github地址: <a href="https://github.com/docker-java/docker-java" target="_blank" rel="noopener">docker-java</a> 目前版本 3.0.13</p>
+</blockquote>
 							  
-						</p> 
+						<p></p> 
 					
 
 					
