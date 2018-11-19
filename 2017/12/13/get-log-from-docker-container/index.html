@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>2018年专业书单</title>
+	<title>使用Docker-Java动态的获取DockerContainer的运行结果</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -97,8 +97,8 @@
 					
 					
 	
-		<a href="/2017/09/12/2018booklist/" itemprop="url">		
-			2018年专业书单		
+		<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">		
+			使用Docker-Java动态的获取DockerContainer的运行结果		
 		</a>
 	
 
@@ -107,9 +107,9 @@
 				<p class="am-article-meta blog-text-center">
 					<span>
 						<i class="fa fa-clock-o"></i> 
-						<a href="/2017/09/12/2018booklist/" itemprop="url">
-	<time datetime="2017-09-11T16:17:13.000Z" itemprop="datePublished">
-  		2017-09-12
+						<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">
+	<time datetime="2017-12-13T15:21:16.000Z" itemprop="datePublished">
+  		2017-12-13
   </time>
 </a>    
 &nbsp;
@@ -119,7 +119,7 @@
 						
 							<i class="fa fa-tags"></i>
 							
-								<a href="#读书" title="读书" rel="4">读书</a>&nbsp;
+								<a href="#docker-java,bug解决,开发" title="docker-java,bug解决,开发" rel="1">docker-java,bug解决,开发</a>&nbsp;
 													 											
 						
 					</span>
@@ -129,23 +129,20 @@
 			<div class="am-article-bd">
 				<div class="content" id="post-content">
 					
-						<p>软狗不是每天都在搬砖的！！！ 我爱学习~</p>
-<p>今年要补些本科落下的基础知识了。面试时候遇到的JAVA相关的知识。毕设要用到Docker和机器学习算法也学一下。 软狗要全栈（除了前端<br><a id="more"></a></p>
-<h4 id="JAVA并发编程艺术"><a href="#JAVA并发编程艺术" class="headerlink" title="JAVA并发编程艺术"></a>JAVA并发编程艺术</h4><blockquote>
-<p>java并发的一些基础知识，以及J.U.C的一些常用类。PS：新买的，在火车上看了1/3就丢了，现在只能啃电子书。很真实。。。mmp</p>
+						<p>docker-java 是 JAVA 操作Docker Remote API 的一个工具。最近项目需要，遇到一些问题，但是又没有什么文档、博客可查，所以总结一下自己遇到的问题。更多其他的问题可以参考他们的测试用例</p>
+<blockquote>
+<p><a href="https://github.com/docker-java/docker-java" target="_blank" rel="noopener">github</a> 目前版本 3.0.13</p>
 </blockquote>
-<h4 id="JAVA8函数式编程"><a href="#JAVA8函数式编程" class="headerlink" title="JAVA8函数式编程"></a>JAVA8函数式编程</h4><blockquote>
-<p>强烈推荐，如果想快速上手Java8,学会Lamda，这是一本好书，很薄，代码也可以在github下载到</p>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="1-首先要开启docker的客户端-我电脑-ubuntu16-04"><a href="#1-首先要开启docker的客户端-我电脑-ubuntu16-04" class="headerlink" title="1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)"></a>1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>查看配置文件位于哪里</span><br><span class="line">systemctl show --property=FragmentPath docker </span><br><span class="line"><span class="meta">#</span>编辑配置文件内容，接收所有ip请求</span><br><span class="line">sudo gedit /lib/systemd/system/docker.service  </span><br><span class="line">ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://127.0.0.1:8787</span><br><span class="line"><span class="meta">#</span> 这样配置的目的是可以通过http的方式进行远程访问，如果不需要的话可以通过自带的sock方式本地访问</span><br><span class="line"><span class="meta">#</span>重新加载配置文件，重启docker daemon</span><br><span class="line">sudo systemctl daemon-reload     </span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+<h4 id="2-建工程-amp-amp-pom-xml引入依赖"><a href="#2-建工程-amp-amp-pom-xml引入依赖" class="headerlink" title="2. 建工程 &amp;&amp; pom.xml引入依赖"></a>2. 建工程 &amp;&amp; pom.xml引入依赖</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.docker-java<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>docker-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.13<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="获取容器实时运行结果"><a href="#获取容器实时运行结果" class="headerlink" title="获取容器实时运行结果"></a>获取容器实时运行结果</h3><blockquote>
+<p>通过查看容器日志的方式,<br>设置一个回调函数，重写onNext(),就可以取到运行的结果了</p>
 </blockquote>
-<h4 id="Docker技术入门与实战"><a href="#Docker技术入门与实战" class="headerlink" title="Docker技术入门与实战"></a>Docker技术入门与实战</h4><blockquote>
-<p>一本关于docker的工具书。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">dockerClient.logContainerCmd(dockerId).withStdOut(<span class="keyword">true</span>).withStdErr(<span class="keyword">true</span>)</span><br><span class="line">                    .exec(<span class="keyword">new</span> LogContainerResultCallback()&#123;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(Frame item)</span> </span>&#123;</span><br><span class="line">                            <span class="keyword">super</span>.onNext(item);</span><br><span class="line">                            System.out.println(<span class="string">"容器运行的结果："</span>+item.toString())</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onComplete</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                            <span class="keyword">super</span>.onComplete();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;).awaitCompletion();</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>awaitComletion()</code>就是让查日志进程阻塞，直到进程调用onComlete()<br>最好等容器停止后再去读，因为容器在运行中可能还没产生日志，但callback读的时候以为读完了，直接执行onComplete就结束了，因此没有输出。 所以建议查日志前，检查一下容器运行情况，代码如下：之后一直循环判断直到容器停止就可以了</p>
 </blockquote>
-<h4 id="Effecttive-Java-英文版（第三版）"><a href="#Effecttive-Java-英文版（第三版）" class="headerlink" title="Effecttive Java 英文版（第三版）"></a>Effecttive Java 英文版（第三版）</h4><blockquote>
-<p>第三版相对于第二版多了很多JAVA8的内容，由于还没有中文版，所以只能读英文的了</p>
-</blockquote>
-<h4 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h4><blockquote>
-<p>读论文的时候发现很多人在用机器学习的算法，周大牛的机器学习是必备的吧 </p>
-</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取容器的运行状态</span></span><br><span class="line">dockerClient.inspectContainerCmd(dockerId).</span><br><span class="line">               exec().getState().getRunning();</span><br></pre></td></tr></table></figure>
 
 					
 				</div>
@@ -155,14 +152,14 @@
 		<ul class="am-pagination">
     
     	<li class="am-pagination-prev">
-   		<a class="pull-left" href="/2017/12/13/get-log-from-docker-container/" title="使用Docker-Java动态的获取DockerContainer的运行结果">
+   		<a class="pull-left" href="/2018/08/10/qinghai5day/" title="青海小憩">
       		&laquo; 上一篇
 		</a>
 		</li>
 	
 	
 		<li class="am-pagination-next">
-		<a class="pull-right" href="/2017/09/12/2018booklist2/" title="2018年娱乐书单">
+		<a class="pull-right" href="/2017/09/12/2018booklist/" title="2018年专业书单">
 			下一篇 &raquo;
 		</a>
 		</li>
@@ -291,7 +288,7 @@
 				
 				
 				<!--toc(post.content)-->
-				<ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#JAVA并发编程艺术"><span class="post-toc-text">JAVA并发编程艺术</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#JAVA8函数式编程"><span class="post-toc-text">JAVA8函数式编程</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Docker技术入门与实战"><span class="post-toc-text">Docker技术入门与实战</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Effecttive-Java-英文版（第三版）"><span class="post-toc-text">Effecttive Java 英文版（第三版）</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#机器学习"><span class="post-toc-text">机器学习</span></a></li></ol>
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#准备工作"><span class="post-toc-text">准备工作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-首先要开启docker的客户端-我电脑-ubuntu16-04"><span class="post-toc-text">1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-建工程-amp-amp-pom-xml引入依赖"><span class="post-toc-text">2. 建工程 &amp;&amp; pom.xml引入依赖</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#获取容器实时运行结果"><span class="post-toc-text">获取容器实时运行结果</span></a></li></ol>
 			</nav>
 			<div class="post-toc-bar"><div>
 		</div></div></aside>
