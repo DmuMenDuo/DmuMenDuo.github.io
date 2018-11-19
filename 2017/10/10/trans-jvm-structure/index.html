@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>爱吃麻辣拌</title>
+	<title>翻译文章:JVM架构简析</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -84,335 +84,272 @@
 		<!--main-->
 		<main> 
 		<div class="page-container">
-		
-	<!-- content srart -->
-<div class="am-g am-g-fixed blog-fixed">
-	<div class="am-u-md-12 am-u-sm-12">
+		<!-- content srart -->
+<div class="am-g am-g-fixed blog-fixed blog-content">
+	<div class="am-u-md-8 am-u-sm-12">
 
-		
-			<article class="am-g blog-entry-article">
+		<article class="am-article blog-article-p">
 
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/20181112154203248342867.jpg" class="am-u-sm-12">
-				</div>	
+			<div class="am-article-hd">
+				
 
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2018/08/10/qinghai5day/" itemprop="url">
-	<time datetime="2018-08-10T15:10:10.000Z" itemprop="datePublished">
-  		2018-08-10
-  </time>
-</a>    
 
-					</span>
-					<span class="theme-annie-post-title">
-						
-	
-		<a href="/2018/08/10/qinghai5day/" itemprop="url">		
-			青海小憩		
-		</a>
-	
-
-					</span>
+				<h1 class="am-article-title blog-text-center">
 					
 					
-						<p>
-							
-								</p><p>距离开学还有一个月的时间，一次去参加会议的偶然机会，就有了这次的青海五日游。<br>刚刚好的季节，刚刚好的行程。吃过了最好吃的羊肉，喝过了最好喝的酸奶，看过了最好看的天。人生也就不过如此吧！</p>
-							  
-						<p></p> 
-					
-
-					
-						<span class="continue-read">      	
-							<a href="/2018/08/10/qinghai5day/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
-				</div>
-		
-			</article>
-		
-			<article class="am-g blog-entry-article">
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/20181119154259784332615.jpg" class="am-u-sm-12">
-				</div>	
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">
-	<time datetime="2017-12-13T15:21:16.000Z" itemprop="datePublished">
-  		2017-12-13
-  </time>
-</a>    
-
-					</span>
-					<span class="theme-annie-post-title">
-						
-	
-		<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">		
-			使用Docker-Java动态的获取Container的log日志		
-		</a>
-	
-
-					</span>
-					
-					
-						<p>
-							
-								</p><p>docker-java 是 JAVA 操作Docker Remote API 的一个工具。最近项目需要读取容器的运行日志出来。记录一下自己遇到的问题。更多其他的问题可以参考他们的测试用例。</p>
-<blockquote>
-<p>github地址: <a href="https://github.com/docker-java/docker-java" target="_blank" rel="noopener">docker-java</a> 目前版本 3.0.13</p>
-</blockquote>
-							  
-						<p></p> 
-					
-
-					
-						<span class="continue-read">      	
-							<a href="/2017/12/13/get-log-from-docker-container/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
-				</div>
-		
-			</article>
-		
-			<article class="am-g blog-entry-article">
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/20181119154260020892449.png" class="am-u-sm-12">
-				</div>	
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">
-	<time datetime="2017-10-10T13:21:16.000Z" itemprop="datePublished">
-  		2017-10-10
-  </time>
-</a>    
-
-					</span>
-					<span class="theme-annie-post-title">
-						
 	
 		<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">		
 			翻译文章:JVM架构简析		
 		</a>
 	
 
+				</h1>
+
+				<p class="am-article-meta blog-text-center">
+					<span>
+						<i class="fa fa-clock-o"></i> 
+						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">
+	<time datetime="2017-10-10T13:21:16.000Z" itemprop="datePublished">
+  		2017-10-10
+  </time>
+</a>    
+&nbsp;
 					</span>
 					
-					
-						<p>
+					<span>						
+						
+							<i class="fa fa-tags"></i>
 							
-								</p><p>每个JAVA开发者都知道字节码将会被<strong>JRE</strong>（java运行时环境）所执行，但是许多人不知道的是<strong>JRE</strong>是<strong>java虚拟机</strong>（JVM）分析字节码，解释代码，以及执行它的那部分实现。对于一个开发者来说知道了解JVM的架构是非常重要的，因为它可以让我们更有效地编写代码。在这篇文章，我们将更深入的了解java中的<strong>JVM架构</strong>以及JVM的<strong>不同组成部分</strong>。</p>
+								<a href="#翻译" title="翻译" rel="1">翻译</a>&nbsp;
+							
+								<a href="#JVM" title="JVM" rel="1">JVM</a>&nbsp;
+													 											
+						
+					</span>
+				</p>
+			</div>
+
+			<div class="am-article-bd">
+				<div class="content" id="post-content">
+					
+						<p>每个JAVA开发者都知道字节码将会被<strong>JRE</strong>（java运行时环境）所执行，但是许多人不知道的是<strong>JRE</strong>是<strong>java虚拟机</strong>（JVM）分析字节码，解释代码，以及执行它的那部分实现。对于一个开发者来说知道了解JVM的架构是非常重要的，因为它可以让我们更有效地编写代码。在这篇文章，我们将更深入的了解java中的<strong>JVM架构</strong>以及JVM的<strong>不同组成部分</strong>。</p>
 <blockquote>
 <p>原文地址：<a href="https://dzone.com/articles/jvm-architecture-explained" target="_blank" rel="noopener">https://dzone.com/articles/jvm-architecture-explained</a></p>
 </blockquote>
-							  
-						<p></p> 
-					
+<a id="more"></a>
+<hr>
+<h2 id="JVM架构简析"><a href="#JVM架构简析" class="headerlink" title="JVM架构简析"></a>JVM架构简析</h2><blockquote>
+<p>一个JVM不同组成部分的综述，以及和其相关的一些图表</p>
+</blockquote>
+<p><img src="http://pic.menduo.xyz/20181119154259959133032.png" alt="20181119154259959133032.png"></p>
+<h3 id="什么是JVM？"><a href="#什么是JVM？" class="headerlink" title="什么是JVM？"></a>什么是JVM？</h3><p>一个<strong>虚拟机</strong>是一个物理机的软件实现。java开发的概念是<strong>WORA（一次编写到处运行）</strong>，所以运行在<strong>虚拟机</strong>上。<strong>编译器</strong>编译java文件生成<strong>.class</strong>文件。然后<strong>.class</strong>文件被放入到一个可以加载执行他的虚拟机中。下面是一个JVM 架构的图。</p>
+<h3 id="JVM是如何工作的？"><a href="#JVM是如何工作的？" class="headerlink" title="JVM是如何工作的？"></a>JVM是如何工作的？</h3><p>在上述的架构图中，JVM被分成了三个主要的子系统：</p>
+<ol>
+<li>类加载子系统。</li>
+<li>运行时数据区域。</li>
+<li>执行引擎。</li>
+</ol>
+<h4 id="1-类加载子系统"><a href="#1-类加载子系统" class="headerlink" title="1. 类加载子系统"></a>1. 类加载子系统</h4><p>java的动态类加载机制在类加载子系统中被处理。由它加载，连接，以及在<strong>运行时</strong>第一次引用类时初始化类文件，而不是在<strong>编译时</strong>。</p>
+<h5 id="1-1-加载"><a href="#1-1-加载" class="headerlink" title="1.1. 加载"></a>1.1. 加载</h5><p>类们将会被这个组件加载。BootStrap 类加载器 ，Extension 类加载器，和Application类加载器将会帮助完成这个过程。</p>
+<ol>
+<li><p><strong>BootStrap类加载器</strong> - 它的责任是加载那些启动相关路径里的类，不仅仅只是rt.jar。最高的优先权被给于给这个加载器。</p>
+</li>
+<li><p><strong>Extension类加载器</strong> - 它的责任是加载那些包含在<strong>jre/lib下的ext</strong>文件夹内的类。</p>
+</li>
+<li><p><strong>Application类加载器</strong> - 他的责任是加载<strong>用户定义的classpath下</strong>以及路径涉及的环境变量等等里面的类。</p>
+</li>
+</ol>
+<p>上述的<strong>类加载器</strong>都遵循<strong>双亲委派模型</strong>去加载类文件。</p>
+<h5 id="1-2-连接"><a href="#1-2-连接" class="headerlink" title="1.2 连接"></a>1.2 连接</h5><ol>
+<li><p><strong>验证 </strong>- 字节码验证器将会验证生成的字节码是否正确，如果验证失败那么我们将得到一个验证错误。</p>
+</li>
+<li><p><strong>准备</strong> - 为所有静态变量分配内存并且设置初始值。</p>
+</li>
+<li><p><strong>解析</strong> - 所有的符号引用将会被替换成方法区的直接引用。 </p>
+</li>
+</ol>
+<h5 id="1-3-初始化"><a href="#1-3-初始化" class="headerlink" title="1.3 初始化"></a>1.3 初始化</h5><p>这是类加载的最后时期，这时候所有的静态变量都会被赋予初值，并且执行类中的静态块。</p>
+<h4 id="2-运行时数据区"><a href="#2-运行时数据区" class="headerlink" title="2. 运行时数据区"></a>2. 运行时数据区</h4><p>运行时数据区被分成了五个主要部分：</p>
+<ul>
+<li><strong>方法区</strong> - 所有<strong>类相关数据</strong>将会被存储在这里，包括静态变量。每一个JVM只有一个方法区，所以它中的资源是被共享的。</li>
+<li><strong>堆</strong> - 所有的<strong>对象</strong>以及他们相关的<strong>实例化变量和数组</strong>被存储在这里。每一个JVM也只有一个堆。因为<strong>方法区</strong>和<strong>堆</strong>是线程间共享的，因此数据的存储<strong>不是线程安全</strong>的。</li>
+<li><strong>栈</strong> - 对于每个线程，都将创建一个单独的<strong>运行时栈</strong>。对于每一个<strong>方法调用</strong>，一个被叫做<strong>栈桢</strong>的实体将会在栈内存中被创建。所有的<strong>局部变量</strong>将会在栈空间被创建。栈空间是线程安全的因为它不共享资源。栈桢被分成如下三个子部分：<ul>
+<li><strong>局部变量表</strong> - 涉及方法的所有<strong>本地变量</strong>以及和他相关的值被储存在这里。</li>
+<li><strong>操作数栈</strong> - 如果需要执行任何中间操作，<strong>操作数栈</strong>扮演者运行时工作空间的作用去执行这些操作。</li>
+<li><strong>桢数据</strong> - 该方法对应的所有符号都存储在这里。在任何<strong>异常</strong>情况下，捕获块信息将在帧数据中维护。</li>
+</ul>
+</li>
+<li><strong>程序计数器</strong> - 每一个线程都有一个独立的<strong>程序计数器</strong>，来保存<strong>当前指令地址</strong>，一旦指令执行完成就<strong>更新</strong>程序计数器为下一条指令地址。</li>
+<li><strong>本地方法栈</strong> - 本地方法栈保存本地方法信息。对于每一个线程，一个独立的本地方法栈将会被创建。</li>
+</ul>
+<h4 id="3-执行引擎"><a href="#3-执行引擎" class="headerlink" title="3. 执行引擎"></a>3. 执行引擎</h4><p>分配到<strong>运行时数据区</strong>的字节码会被执行引擎执行。执行引擎读取字节码并逐步的执行。</p>
+<ul>
+<li><strong>解释器</strong> -  解释器可以很快的解释字节码，但是却执行的很慢。解释器的一个缺点就是当一个方法被调用多次后，每次都需要重新被解释。</li>
+<li><p><strong>实时编译器</strong> - 实时编译器弥补了解释器的不足。执行引擎将在转换字节代码时使用解释器的帮助，但是当它发现重复的代码时，它使用的是JIT编译器，它编译整个字节码并将其更改为本地代码。这种本地方法将会直接被使用在重复的方法调用上，来提升系统的性能。</p>
+<ul>
+<li><strong>中间代码生成器</strong> - 生成中间代码。</li>
+<li><strong>代码优化器</strong> - 负责优化上面生成的中间代码。</li>
+<li><strong>目标代码生成器</strong> - 负责生成机器代码或本地代码</li>
+<li><strong>分析器</strong> - 一个特殊的组件，负责找热点，例如，是否一个方法被多次调用等等。</li>
+</ul>
+</li>
+<li><p><strong>垃圾收集器</strong> - 收集以及移除未被引用的对象。垃圾回收将会被这个”<strong>System.gc()</strong>“调用触发,但是这个执行时不确定的。JVM的垃圾收集器收集被创建的对象。</p>
+</li>
+</ul>
+<p><strong>Java Native Interface (JNI)</strong>: <strong>JNI</strong>将与<strong>本地方法库</strong>交互，并提供执行引擎所需的本地库。<br><strong>本地方法库</strong>:它是执行引擎所需的本地库的集合。</p>
 
 					
-						<span class="continue-read">      	
-							<a href="/2017/10/10/trans-jvm-structure/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
 				</div>
-		
-			</article>
-		
-			<article class="am-g blog-entry-article">
+			</div>
+		</article>
 
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/20181112154195309115242.jpg" class="am-u-sm-12">
-				</div>	
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2017/09/12/2018booklist/" itemprop="url">
-	<time datetime="2017-09-11T16:17:13.000Z" itemprop="datePublished">
-  		2017-09-12
-  </time>
-</a>    
-
-					</span>
-					<span class="theme-annie-post-title">
-						
-	
-		<a href="/2017/09/12/2018booklist/" itemprop="url">		
-			2018年专业书单		
+		<ul class="am-pagination">
+    
+    	<li class="am-pagination-prev">
+   		<a class="pull-left" href="/2017/12/13/get-log-from-docker-container/" title="使用Docker-Java动态的获取Container的log日志">
+      		&laquo; 上一篇
 		</a>
+		</li>
 	
-
-					</span>
-					
-					
-						<p>
-							
-								</p><p>软狗不是每天都在搬砖的！！！ 我爱学习~</p>
-<p>今年要补些本科落下的基础知识了。面试时候遇到的JAVA相关的知识。毕设要用到Docker和机器学习算法也学一下。 软狗要全栈（除了前端<br>
-							  
-						</p> 
-					
-
-					
-						<span class="continue-read">      	
-							<a href="/2017/09/12/2018booklist/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
-				</div>
-		
-			</article>
-		
-			<article class="am-g blog-entry-article">
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/20181112154195438351097.jpg" class="am-u-sm-12">
-				</div>	
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2017/09/12/2018booklist2/" itemprop="url">
-	<time datetime="2017-09-11T16:00:13.000Z" itemprop="datePublished">
-  		2017-09-12
-  </time>
-</a>    
-
-					</span>
-					<span class="theme-annie-post-title">
-						
 	
-		<a href="/2017/09/12/2018booklist2/" itemprop="url">		
-			2018年娱乐书单		
+		<li class="am-pagination-next">
+		<a class="pull-right" href="/2017/09/12/2018booklist/" title="2018年专业书单">
+			下一篇 &raquo;
 		</a>
+		</li>
+	 
+ </ul>
+        
+
+		<div class="theme-annie-comment-button-container">
+	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
+		加载评论
+		<!--加载评论-->
+	</button>
+</div>
+
+<div id="annie-comment-container" class="theme-annie-comment-main-container">
+
+	
+		
+			<!-- comment gitalk -->
+			<!-- show gitalk comment -->
+
+  <div id="gitalk-container"></div>
+
+
+<!-- gitalk`s css & js -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<link rel="stylesheet" href="/css/comment.css">
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<script type="text/javascript">
+	//thanks O-R
+	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
+	//去除尾部匹配正则数组的字符串  
+	//remove redundant characters
+	String.prototype.trimEnd = function(regStr) {
+		var result = this;
+		if(regStr == undefined || regStr == null || regStr == "") {
+			return result;
+		}
+		var array = regStr.split(',');
+
+		if(array.length > 0) {
+
+			var c = array.shift();
+			var str = this;
+			var i = str.length;
+			var rg = new RegExp(c);
+			var matchArr = str.match(rg);
+
+			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
+				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
+					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
+					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
+					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
+					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
+					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
+					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
+				matchStr = matchStr + '$';
+				result = str.replace(new RegExp(matchStr), "");
+			}
+
+			if(array.length > 0) {
+				return result.trimEnd(array.join())
+			} else {
+				return result;
+			}
+		}
+	};
+
+	//create gitalk
+	var gitalk = new Gitalk({
+		clientID: '097e5f5792a7f81b5f45',
+		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
+		//id: window.location.pathname,
+		// id: (window.location.pathname).split("/").pop().substring(0, 49),
+		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
+		repo: 'comments',
+		owner: 'DmuMenDuo',
+		admin: 'DmuMenDuo',
+		distractionFreeMode: 'true',
+	})
+	gitalk.render('gitalk-container');
+</script>
+		
 	
 
-					</span>
-					
-					
-						<p>
-							
-								</p><p>经常被说文盲，多读书是好呀，和别人聊天可以找找话题~</p>
-							  
-						<p></p> 
-					
+</div>
 
-					
-						<span class="continue-read">      	
-							<a href="/2017/09/12/2018booklist2/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
-				</div>
+<script type="text/javascript">
+	/* Show Comment */
+	var Annie_Comment = function() {
+		function Show_Hidden(obj) {
+			obj.style.display = 'block';
+		}
 		
-			</article>
+		//var obutton = $('#annie-comment-button');
+		//var obutton = $('#annie-comment-container');
+		var obutton = document.getElementById("annie-comment-button" || "0");
+		var odiv = document.getElementById("annie-comment-container");
+		if( 'obutton' ) {
+			obutton.onclick = function() {
+				Show_Hidden(odiv);
+				$("#annie-comment-button").css("display", 'none');
+				return false;
+			}
+		}
+	};
+
+	(function Annie_Init() {
+		Annie_Comment();
+	})();
+</script>
 		
-			<article class="am-g blog-entry-article">
+		<!--
+	时间：2018-09-24
+	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
+-->
 
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/2018111215419945609505.jpg" class="am-u-sm-12">
-				</div>	
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2017/01/05/2017booklist2/" itemprop="url">
-	<time datetime="2017-01-05T15:46:43.000Z" itemprop="datePublished">
-  		2017-01-05
-  </time>
-</a>    
-
-					</span>
-					<span class="theme-annie-post-title">
-						
 	
-		<a href="/2017/01/05/2017booklist2/" itemprop="url">		
-			2017娱乐书单		
-		</a>
-	
-
-					</span>
-					
-					
-						<p>
-							
-								</p><p>2017年小说书单</p>
-							  
-						<p></p> 
-					
-
-					
-						<span class="continue-read">      	
-							<a href="/2017/01/05/2017booklist2/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
-				</div>
-		
-			</article>
-		
-			<article class="am-g blog-entry-article">
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
-					<img src="http://pic.menduo.xyz/20181112154199423617527.jpg" class="am-u-sm-12">
-				</div>	
-
-				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
-					<span class="theme-annie-post-date">
-						<a href="/2017/01/05/2017booklist/" itemprop="url">
-	<time datetime="2017-01-05T15:42:55.000Z" itemprop="datePublished">
-  		2017-01-05
-  </time>
-</a>    
-
-					</span>
-					<span class="theme-annie-post-title">
-						
-	
-		<a href="/2017/01/05/2017booklist/" itemprop="url">		
-			2017专业书单		
-		</a>
+		<aside class="post-widget">
+			<nav class="post-toc-wrap" id="post-toc">
+				
+					<strong>文章目录</strong>
+				
+				
+				<!--toc(post.content)-->
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#JVM架构简析"><span class="post-toc-text">JVM架构简析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#什么是JVM？"><span class="post-toc-text">什么是JVM？</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JVM是如何工作的？"><span class="post-toc-text">JVM是如何工作的？</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-类加载子系统"><span class="post-toc-text">1. 类加载子系统</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-1-加载"><span class="post-toc-text">1.1. 加载</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-2-连接"><span class="post-toc-text">1.2 连接</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-3-初始化"><span class="post-toc-text">1.3 初始化</span></a></li></ol></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-运行时数据区"><span class="post-toc-text">2. 运行时数据区</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-执行引擎"><span class="post-toc-text">3. 执行引擎</span></a></li></ol></li></ol></li></ol>
+			</nav>
+			<div class="post-toc-bar"><div>
+		</div></div></aside>
 	
 
-					</span>
-					
-					
-						<p>
-							
-								</p><p>这里要放2017年读过的书单~</p>
-							  
-						<p></p> 
-					
-
-					
-						<span class="continue-read">      	
-							<a href="/2017/01/05/2017booklist/" class="pull-right">
-								展开全文
-							</a>		
-						</span>
-					         		
-				</div>
-		
-			</article>
-		     
-
-		    	
 	</div>
 </div>
-<!-- content end -->
-
-	<!--图文风格-->
-
 		</div>
 		</main>
 		
@@ -827,6 +764,8 @@
 	<script type="text/javascript" src="/js/love.js"></script>
 
 
+
+	<script type="text/javascript" src="/js/toc.js"></script>
 
 
 <script type="text/javascript" src="/js/main.js"></script>

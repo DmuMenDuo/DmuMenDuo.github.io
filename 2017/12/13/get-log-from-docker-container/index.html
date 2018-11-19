@@ -141,15 +141,15 @@
 <p>github地址: <a href="https://github.com/docker-java/docker-java" target="_blank" rel="noopener">docker-java</a> 目前版本 3.0.13</p>
 </blockquote>
 <a id="more"></a>
-<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="1-首先要开启docker的客户端-我电脑-ubuntu16-04"><a href="#1-首先要开启docker的客户端-我电脑-ubuntu16-04" class="headerlink" title="1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)"></a>1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)</h4><pre class="line-numbers language-vim"><code class="language-vim">#查看配置文件位于哪里
-systemctl show <span class="token operator">-</span><span class="token operator">-</span>property<span class="token operator">=</span>FragmentPath docker 
-#编辑配置文件内容，接收所有ip请求
-sudo gedit <span class="token operator">/</span>lib<span class="token operator">/</span>systemd<span class="token operator">/</span>system<span class="token operator">/</span>docker<span class="token operator">.</span>service  
-ExecStart<span class="token operator">=</span><span class="token operator">/</span>usr<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>dockerd <span class="token operator">-</span>H unix<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span><span class="token operator">/</span>var<span class="token operator">/</span>run<span class="token operator">/</span>docker<span class="token operator">.</span>sock <span class="token operator">-</span>H tcp<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span><span class="token number">127.0</span><span class="token operator">.</span><span class="token number">0.1</span><span class="token punctuation">:</span><span class="token number">8787</span>
-# 这样配置的目的是可以通过http的方式进行远程访问，如果不需要的话可以通过自带的sock方式本地访问
-#重新加载配置文件，重启docker daemon
-sudo systemctl daemon<span class="token operator">-</span>reload     
-sudo systemctl restart docker 
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="1-首先要开启docker的客户端-我电脑-ubuntu16-04"><a href="#1-首先要开启docker的客户端-我电脑-ubuntu16-04" class="headerlink" title="1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)"></a>1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)</h4><pre class="line-numbers language-bash"><code class="language-bash"><span class="token comment" spellcheck="true">#查看配置文件位于哪里</span>
+systemctl show --property<span class="token operator">=</span>FragmentPath docker 
+<span class="token comment" spellcheck="true">#编辑配置文件内容，接收所有ip请求</span>
+<span class="token function">sudo</span> gedit /lib/systemd/system/docker.service  
+ExecStart<span class="token operator">=</span>/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://127.0.0.1:8787
+<span class="token comment" spellcheck="true"># 这样配置的目的是可以通过http的方式进行远程访问，如果不需要的话可以通过自带的sock方式本地访问</span>
+<span class="token comment" spellcheck="true">#重新加载配置文件，重启docker daemon</span>
+<span class="token function">sudo</span> systemctl daemon-reload     
+<span class="token function">sudo</span> systemctl restart docker 
 
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h4 id="2-建工程-amp-amp-pom-xml引入依赖"><a href="#2-建工程-amp-amp-pom-xml引入依赖" class="headerlink" title="2. 建工程 &amp;&amp; pom.xml引入依赖"></a>2. 建工程 &amp;&amp; pom.xml引入依赖</h4><pre class="line-numbers language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
@@ -197,7 +197,7 @@ sudo systemctl restart docker
 	
 	
 		<li class="am-pagination-next">
-		<a class="pull-right" href="/2017/09/12/2018booklist/" title="2018年专业书单">
+		<a class="pull-right" href="/2017/10/10/trans-jvm-structure/" title="翻译文章:JVM架构简析">
 			下一篇 &raquo;
 		</a>
 		</li>
