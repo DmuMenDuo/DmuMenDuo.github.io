@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>文章归档: 2017/1</title>
+	<title>head-first-1-factory</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -87,65 +87,222 @@
 		<!-- content srart -->
 <div class="am-g am-g-fixed blog-fixed blog-content">
 	<div class="am-u-md-8 am-u-sm-12">
-		<div class="archive">
 
-			<div class="blog-text-center">
-				
-					<i class="fa fa-book">总计8篇文章</i>
-				
-			</div>  
+		<article class="am-article blog-article-p">
 
-			
+			<div class="am-article-hd">
+				
 
-							
-				
-				
-				
+
+				<h1 class="am-article-title blog-text-center">
 					
+					
+	
+		<a href="/2018/12/03/head-first-1-factory/" itemprop="url">		
+			head-first-1-factory		
+		</a>
+	
+
+				</h1>
+
+				<p class="am-article-meta blog-text-center">
+					<span>
+						<i class="fa fa-clock-o"></i> 
+						<a href="/2018/12/03/head-first-1-factory/" itemprop="url">
+	<time datetime="2018-12-02T16:06:10.000Z" itemprop="datePublished">
+  		2018-12-03
+  </time>
+</a>    
+&nbsp;
+					</span>
+					
+					<span>						
+						
+							<i class="fa fa-tags"></i>
+							
+								<a href="#tags" title="tags" rel="1">tags</a>&nbsp;
+													 											
+						
+					</span>
+				</p>
+			</div>
+
+			<div class="am-article-bd">
+				<div class="content" id="post-content">
+					
+						<h2 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h2><p>等到运行时才会知道去实例化哪个，工厂模式也是对设计原则中的将变化与不变化分离的典型应用。</p>
+<h3 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h3><p><strong>什么时候用简单工厂模式？</strong></p>
+<p>发现出现大量的条件判断去创建不同<code>instance</code>的对象的时候就可以考虑用工厂将其进行封装了。判断的理由就是这段代码出现了变化，所以要进行封装进行提取。</p>
+<p>简单工厂模式UML图：<br><img src="http://pic.menduo.xyz/20181130192703.png" alt="简单工厂模式uml图"></p>
+<h3 id="静态工厂模式"><a href="#静态工厂模式" class="headerlink" title="静态工厂模式"></a>静态工厂模式</h3><p><strong>静态工厂模式：</strong></p>
+<blockquote>
+<p>静态工厂模式只不过是将简单工厂模式的工厂变成了静态类 </p>
+</blockquote>
+<p><strong>静态工厂的优点和缺点？</strong></p>
+<blockquote>
+<p>优点：工厂无需实例化<br>缺点：工厂无法通过继承来改变方法的行为。</p>
+</blockquote>
+<h3 id="工厂模式-1"><a href="#工厂模式-1" class="headerlink" title="工厂模式"></a>工厂模式</h3><p><img src="http://pic.menduo.xyz/20181202152129.png" alt="工厂UML图"></p>
+<p>父类提供一个抽象方法，子类负责实现，这个实现的内容就是一个工厂在产生对象的过程。<br><img src="http://pic.menduo.xyz/20181113154209166559267.png" alt="工厂"></p>
+<p><strong>工厂模式定义：</strong></p>
+<p>工厂模式是用来封装’对象创建’使用的模式，他通过声明一个抽象父类让子类决定应该去创建什么具体对象。<br><img src="http://pic.menduo.xyz/2018111815425544733044.png" alt="工厂模式-2018111815425544733044.png"></p>
+<p><strong>简单工厂和工厂模式的区别？</strong></p>
+<p>工厂模式是创建了一种框架（父类定义，子类实现new对象）。而简单工厂没有。所有工厂模式比简单工厂更加有弹性。</p>
+<p><strong>工厂模式有什么好处？</strong></p>
+<p>封装了变化。代码可以重复利用，方便维护。</p>
+<h3 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h3><p>我理解的<code>抽象</code>这个词的含义是，这个工厂类没有具体指明是什么具体的工厂，而是一组工厂，用来实例化一组产品组，或者实例化一个产品的各个部分。</p>
+<p><img src="http://pic.menduo.xyz/20181118154255459072470.png" alt="20181118154255459072470.png"></p>
+<h3 id="对比一下工厂模式和抽象工厂模式"><a href="#对比一下工厂模式和抽象工厂模式" class="headerlink" title="对比一下工厂模式和抽象工厂模式"></a>对比一下工厂模式和抽象工厂模式</h3><ol>
+<li>工厂模式采用的继承的方式，父类定义个抽象方法，子类去实现。这个实现的过程就是去创建自己需要的对象。</li>
+<li>抽象工厂是定义一个公共接口，每一个接口都是一个要实例化对象的方法。抽象工厂在使用的时候会被当成属性注入需要实例化的地方。</li>
+</ol>
 
 					
-					<!--<a href="/archives/2017" class="archive-year">2017</a>-->
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2017/01">
-							2017-01
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2017/01/05/2017booklist2/" itemprop="url">2017娱乐书单</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2017/01/05/2017booklist2/" itemprop="url">01-05</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-								
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2017/01/05/2017booklist/" itemprop="url">2017专业书单</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2017/01/05/2017booklist/" itemprop="url">01-05</a>
-					</div>
-				</div>		        							
-			
-				
-			    
-		</div>
-	</div>
+				</div>
+			</div>
+		</article>
+
+		<ul class="am-pagination">
+    
+	
+		<li class="am-pagination-next">
+		<a class="pull-right" href="/2018/08/10/qinghai5day/" title="青海小憩">
+			下一篇 &raquo;
+		</a>
+		</li>
+	 
+ </ul>
+        
+
+		<div class="theme-annie-comment-button-container">
+	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
+		加载评论
+		<!--加载评论-->
+	</button>
 </div>
 
+<div id="annie-comment-container" class="theme-annie-comment-main-container">
+
+	
+		
+			<!-- comment gitalk -->
+			<!-- show gitalk comment -->
+
+  <div id="gitalk-container"></div>
+
+
+<!-- gitalk`s css & js -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<link rel="stylesheet" href="/css/comment.css">
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<script type="text/javascript">
+	//thanks O-R
+	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
+	//去除尾部匹配正则数组的字符串  
+	//remove redundant characters
+	String.prototype.trimEnd = function(regStr) {
+		var result = this;
+		if(regStr == undefined || regStr == null || regStr == "") {
+			return result;
+		}
+		var array = regStr.split(',');
+
+		if(array.length > 0) {
+
+			var c = array.shift();
+			var str = this;
+			var i = str.length;
+			var rg = new RegExp(c);
+			var matchArr = str.match(rg);
+
+			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
+				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
+					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
+					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
+					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
+					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
+					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
+					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
+				matchStr = matchStr + '$';
+				result = str.replace(new RegExp(matchStr), "");
+			}
+
+			if(array.length > 0) {
+				return result.trimEnd(array.join())
+			} else {
+				return result;
+			}
+		}
+	};
+
+	//create gitalk
+	var gitalk = new Gitalk({
+		clientID: '097e5f5792a7f81b5f45',
+		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
+		//id: window.location.pathname,
+		// id: (window.location.pathname).split("/").pop().substring(0, 49),
+		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
+		repo: 'comments',
+		owner: 'DmuMenDuo',
+		admin: 'DmuMenDuo',
+		distractionFreeMode: 'true',
+	})
+	gitalk.render('gitalk-container');
+</script>
+		
+	
+
+</div>
+
+<script type="text/javascript">
+	/* Show Comment */
+	var Annie_Comment = function() {
+		function Show_Hidden(obj) {
+			obj.style.display = 'block';
+		}
+		
+		//var obutton = $('#annie-comment-button');
+		//var obutton = $('#annie-comment-container');
+		var obutton = document.getElementById("annie-comment-button" || "0");
+		var odiv = document.getElementById("annie-comment-container");
+		if( 'obutton' ) {
+			obutton.onclick = function() {
+				Show_Hidden(odiv);
+				$("#annie-comment-button").css("display", 'none');
+				return false;
+			}
+		}
+	};
+
+	(function Annie_Init() {
+		Annie_Comment();
+	})();
+</script>
+		
+		<!--
+	时间：2018-09-24
+	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
+-->
+
+	
+		<aside class="post-widget">
+			<nav class="post-toc-wrap" id="post-toc">
+				
+					<strong>文章目录</strong>
+				
+				
+				<!--toc(post.content)-->
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#工厂模式"><span class="post-toc-text">工厂模式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#简单工厂模式"><span class="post-toc-text">简单工厂模式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#静态工厂模式"><span class="post-toc-text">静态工厂模式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#工厂模式-1"><span class="post-toc-text">工厂模式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#抽象工厂模式"><span class="post-toc-text">抽象工厂模式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对比一下工厂模式和抽象工厂模式"><span class="post-toc-text">对比一下工厂模式和抽象工厂模式</span></a></li></ol></li></ol>
+			</nav>
+			<div class="post-toc-bar"><div>
+		</div></div></aside>
+	
+
+	</div>
+</div>
 		</div>
 		</main>
 		
@@ -212,6 +369,11 @@
 	}
 </style>
 <!-- 
+
+	<script src="/js/motto.js"></script>
+	<script type="text/javascript">
+		$(".motto").html(getMingYanContent());
+	</script>	
  -->
 
 
@@ -555,6 +717,8 @@
 	<script type="text/javascript" src="/js/love.js"></script>
 
 
+
+	<script type="text/javascript" src="/js/toc.js"></script>
 
 
 <script type="text/javascript" src="/js/main.js"></script>
