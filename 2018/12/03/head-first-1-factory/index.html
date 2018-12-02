@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>head-first-1-factory</title>
+	<title>headfirst设计模式-工厂和抽象工厂笔记</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -99,7 +99,7 @@
 					
 	
 		<a href="/2018/12/03/head-first-1-factory/" itemprop="url">		
-			head-first-1-factory		
+			headfirst设计模式-工厂和抽象工厂笔记		
 		</a>
 	
 
@@ -120,7 +120,11 @@
 						
 							<i class="fa fa-tags"></i>
 							
-								<a href="#tags" title="tags" rel="1">tags</a>&nbsp;
+								<a href="#工厂" title="工厂" rel="1">工厂</a>&nbsp;
+							
+								<a href="#抽象工厂" title="抽象工厂" rel="1">抽象工厂</a>&nbsp;
+							
+								<a href="#设计模式" title="设计模式" rel="1">设计模式</a>&nbsp;
 													 											
 						
 					</span>
@@ -130,7 +134,11 @@
 			<div class="am-article-bd">
 				<div class="content" id="post-content">
 					
-						<h2 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h2><p>等到运行时才会知道去实例化哪个，工厂模式也是对设计原则中的将变化与不变化分离的典型应用。</p>
+						<blockquote>
+<p>设计模式-工厂和抽象工厂。<br>github: <a href="https://github.com/DmuMenDuo/JAVADesignPattern/tree/master/src/xyz/menduo/factory" target="_blank" rel="noopener">https://github.com/DmuMenDuo/JAVADesignPattern</a></p>
+</blockquote>
+<a id="more"></a>
+<h2 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h2><p>等到运行时才会知道去实例化哪个，工厂模式也是对设计原则中的将变化与不变化分离的典型应用。</p>
 <h3 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h3><p><strong>什么时候用简单工厂模式？</strong></p>
 <p>发现出现大量的条件判断去创建不同<code>instance</code>的对象的时候就可以考虑用工厂将其进行封装了。判断的理由就是这段代码出现了变化，所以要进行封装进行提取。</p>
 <p>简单工厂模式UML图：<br><img src="http://pic.menduo.xyz/20181130192703.png" alt="简单工厂模式uml图"></p>
