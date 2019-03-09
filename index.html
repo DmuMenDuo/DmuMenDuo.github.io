@@ -109,7 +109,7 @@
 						
 	
 		<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">		
-			filezip-cause-jvm-crush.md		
+			FileZip导致的JVM崩溃问题分析		
 		</a>
 	
 
@@ -118,11 +118,7 @@
 					
 						<p>
 							
-								ZipFile 导致JVM奔溃现象分析现象：
-日志无任何异常产生，但是服务进程已经死掉。定位到日志最后一行线程调用了OnlineJudgeControler，因此怀疑是慕码社区的代码（也就是我的锅T_T）导致的崩溃
-查看JVM崩溃日志hs_err_pid**.log，发现down机时，线程发出了SIGBUS信号，线程停在了ZipFile对代码包解压上。搜索了一下网上关于这方面的解释。
-
-原因具体原	
+								</p><p>3.10 爬起床查日志，改bug.T_T.<br>
 							  
 						</p> 
 					
