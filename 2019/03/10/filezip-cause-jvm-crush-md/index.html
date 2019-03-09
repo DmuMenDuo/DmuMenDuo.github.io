@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>tag: 翻译</title>
+	<title>filezip-cause-jvm-crush.md</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -87,50 +87,221 @@
 		<!-- content srart -->
 <div class="am-g am-g-fixed blog-fixed blog-content">
 	<div class="am-u-md-8 am-u-sm-12">
-		<div class="archive">
 
-			<div class="blog-text-center">
+		<article class="am-article blog-article-p">
+
+			<div class="am-article-hd">
 				
-					<i class="fa fa-book">翻译</i>
-				
-			</div>  
 
-			
 
+				<h1 class="am-article-title blog-text-center">
+					
+					
+	
+		<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">		
+			filezip-cause-jvm-crush.md		
+		</a>
+	
+
+				</h1>
+
+				<p class="am-article-meta blog-text-center">
+					<span>
+						<i class="fa fa-clock-o"></i> 
+						<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">
+	<time datetime="2019-03-09T16:33:47.000Z" itemprop="datePublished">
+  		2019-03-10
+  </time>
+</a>    
+&nbsp;
+					</span>
+					
+					<span>						
+						
+							<i class="fa fa-tags"></i>
 							
-				
-				
-				
+								<a href="#java" title="java" rel="1">java</a>&nbsp;
+							
+								<a href="#bug解决" title="bug解决" rel="2">bug解决</a>&nbsp;
+							
+								<a href="#开发" title="开发" rel="2">开发</a>&nbsp;
+							
+								<a href="#日志" title="日志" rel="2">日志</a>&nbsp;
+													 											
+						
+					</span>
+				</p>
+			</div>
+
+			<div class="am-article-bd">
+				<div class="content" id="post-content">
 					
+						<h2 id="ZipFile-导致JVM奔溃现象分析"><a href="#ZipFile-导致JVM奔溃现象分析" class="headerlink" title="ZipFile 导致JVM奔溃现象分析"></a>ZipFile 导致JVM奔溃现象分析</h2><h3 id="现象："><a href="#现象：" class="headerlink" title="现象："></a>现象：</h3><ol>
+<li>日志无任何异常产生，但是服务进程已经死掉。定位到日志最后一行线程调用了<code>OnlineJudgeControler</code>，因此怀疑是慕码社区的代码（也就是我的锅T_T）导致的崩溃</li>
+<li>查看JVM崩溃日志<code>hs_err_pid**.log</code>，发现down机时，线程发出了SIGBUS信号，线程停在了ZipFile对代码包解压上。搜索了一下网上关于这方面的解释。</li>
+</ol>
+<h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><p>具体原因就是：我的一个接口会去下载一个压缩包到一个特定的目录，然后在解开这个压缩包（这个文件被映射到了系统内存），但是如果此时另外一个线程也执行这个接口就会将这个压缩包重写（改写了硬盘文件）。导致第一个解压过程出现异常（因此此时会发现自己已经被另外一个线程改变了），从而导致了JVM直接崩溃。</p>
+<p><strong>这里解释一下mmap内存机制：</strong></p>
+<p>我们知道直接对磁盘上的内容会比从内存中读去慢很多，mmap内存文件映射其实就是将磁盘上的一个文件映射到内存中的作用。进程通过对内存的修改来达到对文件的修改，因此mmap系统调用常常用于进程间得系统调用。</p>
+<p><strong>官方给出的关于mmap导致JVM崩溃的解释：</strong></p>
+<p>Disabling mmap Usage (on Solaris or Linux) This release includes a new system property, sun.zip.disableMemoryMapping, which allows the user to disable the mmap usage in Sun’s java.util.zip.Zipfile implementation (on Solaris and Linux platforms). Solaris or Linux applications that use java.util.zip.ZipFile may experience a SIGBUS VM crash if the application accidentally overwrites any zip or jar files that are still being used by the same Java runtime. Although this is a programming error of the offending application, this system property provides a solution to avoid the VM crash. With the property set to true (-Dsun.zip.disableMemoryMapping=true, or simply -Dsun.zip.disableMemoryMapping) the Sun JDK/JRE runtime disables the mmap usage and the VM crash that might otherwise occur by overwriting the jar or zip file can be avoided.</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><ol>
+<li>官方说明的那样对zip禁用mmap<blockquote>
+<p>在启动参数中加入-Dsun.zip.disableMemoryMapping=true </p>
+</blockquote>
+</li>
+<li>对代码进行修改，防止多个进程访问同一个文件，可以考虑加锁，或者对该文件进行备份，每个线程访问不同的文件</li>
+</ol>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><blockquote>
+<p>参考资料1 <a href="https://blog.csdn.net/zqixiao_09/article/details/51088478" target="_blank" rel="noopener">https://blog.csdn.net/zqixiao_09/article/details/51088478</a><br>参考资料2 <a href="https://my.oschina.net/shipley/blog/979231" target="_blank" rel="noopener">https://my.oschina.net/shipley/blog/979231</a></p>
+</blockquote>
 
 					
-					<!--<a href="/archives/2017" class="archive-year">2017</a>-->
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2017/10">
-							2017-10
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">翻译文章:JVM架构简析</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">10-10</a>
-					</div>
-				</div>		        							
-			
-				
-			    
-		</div>
-	</div>
+				</div>
+			</div>
+		</article>
+
+		<ul class="am-pagination">
+    
+	
+		<li class="am-pagination-next">
+		<a class="pull-right" href="/2018/12/03/head-first-1-factory/" title="headfirst设计模式-工厂和抽象工厂笔记">
+			下一篇 &raquo;
+		</a>
+		</li>
+	 
+ </ul>
+        
+
+		<div class="theme-annie-comment-button-container">
+	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
+		加载评论
+		<!--加载评论-->
+	</button>
 </div>
 
+<div id="annie-comment-container" class="theme-annie-comment-main-container">
+
+	
+		
+			<!-- comment gitalk -->
+			<!-- show gitalk comment -->
+
+  <div id="gitalk-container"></div>
+
+
+<!-- gitalk`s css & js -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<link rel="stylesheet" href="/css/comment.css">
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<script type="text/javascript">
+	//thanks O-R
+	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
+	//去除尾部匹配正则数组的字符串  
+	//remove redundant characters
+	String.prototype.trimEnd = function(regStr) {
+		var result = this;
+		if(regStr == undefined || regStr == null || regStr == "") {
+			return result;
+		}
+		var array = regStr.split(',');
+
+		if(array.length > 0) {
+
+			var c = array.shift();
+			var str = this;
+			var i = str.length;
+			var rg = new RegExp(c);
+			var matchArr = str.match(rg);
+
+			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
+				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
+					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
+					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
+					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
+					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
+					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
+					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
+				matchStr = matchStr + '$';
+				result = str.replace(new RegExp(matchStr), "");
+			}
+
+			if(array.length > 0) {
+				return result.trimEnd(array.join())
+			} else {
+				return result;
+			}
+		}
+	};
+
+	//create gitalk
+	var gitalk = new Gitalk({
+		clientID: '097e5f5792a7f81b5f45',
+		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
+		//id: window.location.pathname,
+		// id: (window.location.pathname).split("/").pop().substring(0, 49),
+		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
+		repo: 'comments',
+		owner: 'DmuMenDuo',
+		admin: 'DmuMenDuo',
+		distractionFreeMode: 'true',
+	})
+	gitalk.render('gitalk-container');
+</script>
+		
+	
+
+</div>
+
+<script type="text/javascript">
+	/* Show Comment */
+	var Annie_Comment = function() {
+		function Show_Hidden(obj) {
+			obj.style.display = 'block';
+		}
+		
+		//var obutton = $('#annie-comment-button');
+		//var obutton = $('#annie-comment-container');
+		var obutton = document.getElementById("annie-comment-button" || "0");
+		var odiv = document.getElementById("annie-comment-container");
+		if( 'obutton' ) {
+			obutton.onclick = function() {
+				Show_Hidden(odiv);
+				$("#annie-comment-button").css("display", 'none');
+				return false;
+			}
+		}
+	};
+
+	(function Annie_Init() {
+		Annie_Comment();
+	})();
+</script>
+		
+		<!--
+	时间：2018-09-24
+	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
+-->
+
+	
+		<aside class="post-widget">
+			<nav class="post-toc-wrap" id="post-toc">
+				
+					<strong>文章目录</strong>
+				
+				
+				<!--toc(post.content)-->
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ZipFile-导致JVM奔溃现象分析"><span class="post-toc-text">ZipFile 导致JVM奔溃现象分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#现象："><span class="post-toc-text">现象：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#原因"><span class="post-toc-text">原因</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解决方法"><span class="post-toc-text">解决方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#参考资料"><span class="post-toc-text">参考资料</span></a></li></ol></li></ol>
+			</nav>
+			<div class="post-toc-bar"><div>
+		</div></div></aside>
+	
+
+	</div>
+</div>
 		</div>
 		</main>
 		
@@ -197,6 +368,11 @@
 	}
 </style>
 <!-- 
+
+	<script src="/js/motto.js"></script>
+	<script type="text/javascript">
+		$(".motto").html(getMingYanContent());
+	</script>	
  -->
 
 
@@ -540,6 +716,8 @@
 	<script type="text/javascript" src="/js/love.js"></script>
 
 
+
+	<script type="text/javascript" src="/js/toc.js"></script>
 
 
 <script type="text/javascript" src="/js/main.js"></script>

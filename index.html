@@ -93,6 +93,54 @@
 			<article class="am-g blog-entry-article">
 
 				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
+					<img src="http://pic.menduo.xyz/20190310003457.png" class="am-u-sm-12">
+				</div>	
+
+				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+					<span class="theme-annie-post-date">
+						<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">
+	<time datetime="2019-03-09T16:33:47.000Z" itemprop="datePublished">
+  		2019-03-10
+  </time>
+</a>    
+
+					</span>
+					<span class="theme-annie-post-title">
+						
+	
+		<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">		
+			filezip-cause-jvm-crush.md		
+		</a>
+	
+
+					</span>
+					
+					
+						<p>
+							
+								ZipFile 导致JVM奔溃现象分析现象：
+日志无任何异常产生，但是服务进程已经死掉。定位到日志最后一行线程调用了OnlineJudgeControler，因此怀疑是慕码社区的代码（也就是我的锅T_T）导致的崩溃
+查看JVM崩溃日志hs_err_pid**.log，发现down机时，线程发出了SIGBUS信号，线程停在了ZipFile对代码包解压上。搜索了一下网上关于这方面的解释。
+
+原因具体原	
+							  
+						</p> 
+					
+
+					
+						<span class="continue-read">      	
+							<a href="/2019/03/10/filezip-cause-jvm-crush-md/" class="pull-right">
+								展开全文
+							</a>		
+						</span>
+					         		
+				</div>
+		
+			</article>
+		
+			<article class="am-g blog-entry-article">
+
+				<div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
 					<img src="http://pic.menduo.xyz/2018111815425544733044.png-demo" class="am-u-sm-12">
 				</div>	
 
@@ -483,7 +531,7 @@
 	<div class="blog-text-center">
 		<div class="theme-annie-copyright">
 			
-				&copy; 2017 - 2018, content by men duo. All Rights Reserved.			       	
+				&copy; 2017 - 2019, content by men duo. All Rights Reserved.			       	
 			
 		</div>
 	</div>
