@@ -143,7 +143,7 @@
 </ol>
 <h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><p>具体原因就是：我的一个接口会去下载一个压缩包到一个特定的目录，然后在解开这个压缩包（这个文件被映射到了系统内存），但是如果此时另外一个线程也执行这个接口就会将这个压缩包重写（改写了硬盘文件）。导致第一个解压过程出现异常（因此此时会发现自己已经被另外一个线程改变了），从而导致了JVM直接崩溃。</p>
 <p><strong>这里解释一下mmap内存机制：</strong></p>
-<p>我们知道直接对磁盘上的内容会比从内存中读去慢很多，mmap内存文件映射其实就是将磁盘上的一个文件映射到内存中的作用。进程通过对内存的修改来达到对文件的修改，因此mmap系统调用常常用于进程间得系统调用。</p>
+<p>我们知道直接对磁盘上的内容会比从内存中读去慢很多，mmap内存文件映射其实就是将磁盘上的一个文件映射到内存中的作用。进程通过对内存的修改来达到对文件的修改，因此mmap系统调用常常用于进程间共享内存方式的系统调用。</p>
 <p><strong>官方给出的关于mmap导致JVM崩溃的解释：</strong></p>
 <p>Disabling mmap Usage (on Solaris or Linux) This release includes a new system property, sun.zip.disableMemoryMapping, which allows the user to disable the mmap usage in Sun’s java.util.zip.Zipfile implementation (on Solaris and Linux platforms). Solaris or Linux applications that use java.util.zip.ZipFile may experience a SIGBUS VM crash if the application accidentally overwrites any zip or jar files that are still being used by the same Java runtime. Although this is a programming error of the offending application, this system property provides a solution to avoid the VM crash. With the property set to true (-Dsun.zip.disableMemoryMapping=true, or simply -Dsun.zip.disableMemoryMapping) the Sun JDK/JRE runtime disables the mmap usage and the VM crash that might otherwise occur by overwriting the jar or zip file can be avoided.</p>
 <h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><ol>
