@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>FileZip导致的JVM崩溃问题分析</title>
+	<title>int-with-integer</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -98,8 +98,8 @@
 					
 					
 	
-		<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">		
-			FileZip导致的JVM崩溃问题分析		
+		<a href="/2019/04/21/int-with-integer/" itemprop="url">		
+			int-with-integer		
 		</a>
 	
 
@@ -108,9 +108,9 @@
 				<p class="am-article-meta blog-text-center">
 					<span>
 						<i class="fa fa-clock-o"></i> 
-						<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">
-	<time datetime="2019-03-09T16:33:47.000Z" itemprop="datePublished">
-  		2019-03-10
+						<a href="/2019/04/21/int-with-integer/" itemprop="url">
+	<time datetime="2019-04-21T04:59:49.000Z" itemprop="datePublished">
+  		2019-04-21
   </time>
 </a>    
 &nbsp;
@@ -122,11 +122,7 @@
 							
 								<a href="#java" title="java" rel="2">java</a>&nbsp;
 							
-								<a href="#bug解决" title="bug解决" rel="2">bug解决</a>&nbsp;
-							
-								<a href="#开发" title="开发" rel="2">开发</a>&nbsp;
-							
-								<a href="#日志" title="日志" rel="2">日志</a>&nbsp;
+								<a href="#基础知识" title="基础知识" rel="1">基础知识</a>&nbsp;
 													 											
 						
 					</span>
@@ -136,26 +132,65 @@
 			<div class="am-article-bd">
 				<div class="content" id="post-content">
 					
-						<p>3.10 爬起床查日志，改bug.T_T.<br><a id="more"></a></p>
-<h2 id="ZipFile-导致JVM奔溃现象分析"><a href="#ZipFile-导致JVM奔溃现象分析" class="headerlink" title="ZipFile 导致JVM奔溃现象分析"></a>ZipFile 导致JVM奔溃现象分析</h2><h3 id="现象："><a href="#现象：" class="headerlink" title="现象："></a>现象：</h3><ol>
-<li>日志无任何异常产生，但是服务进程已经死掉。定位到日志最后一行线程调用了<code>OnlineJudgeControler</code>，因此怀疑是慕码社区的代码（也就是我的锅T_T）导致的崩溃</li>
-<li>查看JVM崩溃日志<code>hs_err_pid**.log</code>，发现down机时，线程发出了SIGBUS信号，线程停在了ZipFile对代码包解压上。搜索了一下网上关于这方面的解释。</li>
-</ol>
-<h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><p>具体原因就是：我的一个接口会去下载一个压缩包到一个特定的目录，然后在解开这个压缩包（这个文件被映射到了系统内存），但是如果此时另外一个线程也执行这个接口就会将这个压缩包重写（改写了硬盘文件）。导致第一个解压过程出现异常（因此此时会发现自己已经被另外一个线程改变了），从而导致了JVM直接崩溃。</p>
-<p><strong>这里解释一下mmap内存机制：</strong></p>
-<p>我们知道直接对磁盘上的内容会比从内存中读去慢很多，mmap内存文件映射其实就是将磁盘上的一个文件映射到内存中的作用。进程通过对内存的修改来达到对文件的修改，因此mmap系统调用常常用于进程间共享内存方式的系统调用。</p>
-<p><strong>官方给出的关于mmap导致JVM崩溃的解释：</strong></p>
-<p>Disabling mmap Usage (on Solaris or Linux) This release includes a new system property, sun.zip.disableMemoryMapping, which allows the user to disable the mmap usage in Sun’s java.util.zip.Zipfile implementation (on Solaris and Linux platforms). Solaris or Linux applications that use java.util.zip.ZipFile may experience a SIGBUS VM crash if the application accidentally overwrites any zip or jar files that are still being used by the same Java runtime. Although this is a programming error of the offending application, this system property provides a solution to avoid the VM crash. With the property set to true (-Dsun.zip.disableMemoryMapping=true, or simply -Dsun.zip.disableMemoryMapping) the Sun JDK/JRE runtime disables the mmap usage and the VM crash that might otherwise occur by overwriting the jar or zip file can be avoided.</p>
-<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><ol>
-<li>官方说明的那样对zip禁用mmap<blockquote>
-<p>在启动参数中加入-Dsun.zip.disableMemoryMapping=true </p>
+						<p>昨天阅文的一道笔试题，让仔细解释一下 <code>int</code>和<code>Integer</code>各种不同数据比较的问题，我发现自己能说出来的东西挺少的。阿里一面面试官说我了解知识的深度不够的问题，确实让我想了很多，其实我给自己的<code>特质</code>定位应该是可以迅速发现问题并解决、可以很快的举一反三，但是很少会因为这个问题去思考到底是底层是因为什么，也就是说<code>总结反思</code>的能力太差了，说白了还是修炼不到位，平时太懒了。</p>
+<p>所以以后遇到的每个问题都要认真的记录下来。争取秋招拿offer!</p>
+<a id="more"></a>
+<p>对于这个问题，首先有个<strong>装箱</strong>和<strong>拆箱</strong>的概念要首先被明确。也就是基本类型和包装类型可以相互转化。</p>
+<h3 id="什么是装箱和拆箱？"><a href="#什么是装箱和拆箱？" class="headerlink" title="什么是装箱和拆箱？"></a>什么是装箱和拆箱？</h3><p>对于每一个基本类型都会有一个对应的包装类型。例如<code>int</code>的包装类型就是<code>Integer</code>。而拆箱动作就是将包装类型转化为基本类型，装箱动作就是将基本类型变成包装类型。</p>
+<h4 id="对应的API-以Integer为例："><a href="#对应的API-以Integer为例：" class="headerlink" title="对应的API,以Integer为例："></a>对应的API,以Integer为例：</h4><ul>
+<li>基本类型 –&gt; 包装类型 Integer i = Integer.valueOf(int);</li>
+</ul>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> Integer <span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">>=</span> IntegerCache<span class="token punctuation">.</span>low <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;=</span> IntegerCache<span class="token punctuation">.</span>high<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> IntegerCache<span class="token punctuation">.</span>cache<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token operator">-</span>IntegerCache<span class="token punctuation">.</span>low<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">;</span> 
+        <span class="token comment" spellcheck="true">//常量池缓存。[-128,127 or high] 默认127</span>
+        <span class="token comment" spellcheck="true">//其中缓存池high大小可通过参数『java.lang.Integer.IntegerCache.high』进行调整,</span>
+        <span class="token comment" spellcheck="true">//最大为Integer.MAX_VALUE - 128 - 1 </span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>包装类型 –&gt; 基本类型 int ii = i.intValue();</li>
+</ul>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">intValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> value<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><strong>总结：装箱操作就是调用包装类型的valueOf ;拆箱操作就是调用包装类型的xxValue()</strong></p>
+<h4 id="Java可以做到自动拆箱和装箱"><a href="#Java可以做到自动拆箱和装箱" class="headerlink" title="Java可以做到自动拆箱和装箱"></a>Java可以做到自动拆箱和装箱</h4><blockquote>
+<p>在java中已经实现了自动拆箱和装箱的操作。</p>
 </blockquote>
-</li>
-<li>对代码进行修改，防止多个进程访问同一个文件，可以考虑加锁，或者对该文件进行备份，每个线程访问不同的文件</li>
-</ol>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><blockquote>
-<p>参考资料1 <a href="https://blog.csdn.net/zqixiao_09/article/details/51088478" target="_blank" rel="noopener">https://blog.csdn.net/zqixiao_09/article/details/51088478</a><br>参考资料2 <a href="https://my.oschina.net/shipley/blog/979231" target="_blank" rel="noopener">https://my.oschina.net/shipley/blog/979231</a></p>
+<blockquote>
+<p>时机：当任何一个操作中混用了基本类型和装箱类型，装箱类型就会进行拆箱操作。</p>
 </blockquote>
+<h3 id="总结几个混合使用的要点"><a href="#总结几个混合使用的要点" class="headerlink" title="总结几个混合使用的要点"></a>总结几个混合使用的要点</h3><h4 id="一些简单的测试用例进行解释整个-int和Integer进行比较的总结："><a href="#一些简单的测试用例进行解释整个-int和Integer进行比较的总结：" class="headerlink" title="一些简单的测试用例进行解释整个 int和Integer进行比较的总结："></a>一些简单的测试用例进行解释整个 int和Integer进行比较的总结：</h4><ul>
+<li>int 和 Integer进行混合比较时，Integer会进行拆箱操作变成基本类型。</li>
+<li>Integer xx  = 1 这种会调用valueOf自动装箱。</li>
+<li>Integer进行new操作的对象是放到堆上的。</li>
+<li>Integer 调用valueOf返回的对象，分两种情况：① -128 &lt;= x &lt;= 127 返回的常量池缓冲区的对象 ② x &gt; 128 会在堆上new一个新的对象 (只考虑默认的情况)</li>
+</ul>
+<h4 id="具体的几个测试用例"><a href="#具体的几个测试用例" class="headerlink" title="具体的几个测试用例"></a>具体的几个测试用例</h4><pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">int</span> a0 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> b0 <span class="token operator">=</span> <span class="token number">128</span><span class="token punctuation">;</span>
+        Integer a1 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        Integer b1 <span class="token operator">=</span> <span class="token number">128</span><span class="token punctuation">;</span>
+        Integer a2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Integer a3 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Integer b3 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">128</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Integer a4 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Integer b4 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">128</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a0 <span class="token operator">==</span> a1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 首先a1返回的是常量池中的对象，又因为和int进行比较所以进行拆箱操作</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b0 <span class="token operator">==</span> b1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 同上，但是会在堆上new一个新的对象然后自动拆箱</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a1 <span class="token operator">==</span> a2<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false 首先 a1是缓存在常量池的对象，a2是在堆上new的对象</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a3 <span class="token operator">==</span> a2<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false a3返回的是放在常量池中的对象，两个对象不是同一个</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a3 <span class="token operator">==</span> a1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 返回都是常量池的中的对象，比较地址相等</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a3 <span class="token operator">==</span> a4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 返回都是常量池进行缓存过的对象，比较地址相等</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b3 <span class="token operator">==</span> b4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false 两个堆上新new对象，具体看valueOf源码，在上面</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a0 <span class="token operator">==</span> a4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 拆箱比较</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b0 <span class="token operator">==</span> b4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 拆箱</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b1 <span class="token operator">==</span> b4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false 装箱返回new的堆上对象 和 new的堆上对象</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 					
 				</div>
@@ -164,15 +199,9 @@
 
 		<ul class="am-pagination">
     
-    	<li class="am-pagination-prev">
-   		<a class="pull-left" href="/2019/04/21/int-with-integer/" title="int-with-integer">
-      		&laquo; 上一篇
-		</a>
-		</li>
-	
 	
 		<li class="am-pagination-next">
-		<a class="pull-right" href="/2018/12/03/head-first-1-factory/" title="headfirst设计模式-工厂和抽象工厂笔记">
+		<a class="pull-right" href="/2019/03/10/filezip-cause-jvm-crush-md/" title="FileZip导致的JVM崩溃问题分析">
 			下一篇 &raquo;
 		</a>
 		</li>
@@ -301,7 +330,7 @@
 				
 				
 				<!--toc(post.content)-->
-				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ZipFile-导致JVM奔溃现象分析"><span class="post-toc-text">ZipFile 导致JVM奔溃现象分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#现象："><span class="post-toc-text">现象：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#原因"><span class="post-toc-text">原因</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解决方法"><span class="post-toc-text">解决方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#参考资料"><span class="post-toc-text">参考资料</span></a></li></ol></li></ol>
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#什么是装箱和拆箱？"><span class="post-toc-text">什么是装箱和拆箱？</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#对应的API-以Integer为例："><span class="post-toc-text">对应的API,以Integer为例：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Java可以做到自动拆箱和装箱"><span class="post-toc-text">Java可以做到自动拆箱和装箱</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#总结几个混合使用的要点"><span class="post-toc-text">总结几个混合使用的要点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#一些简单的测试用例进行解释整个-int和Integer进行比较的总结："><span class="post-toc-text">一些简单的测试用例进行解释整个 int和Integer进行比较的总结：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#具体的几个测试用例"><span class="post-toc-text">具体的几个测试用例</span></a></li></ol></li></ol>
 			</nav>
 			<div class="post-toc-bar"><div>
 		</div></div></aside>
