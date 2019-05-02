@@ -168,7 +168,7 @@ output <span class="token operator">=</span> IOUtils<span class="token punctuati
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 </ul>
-<h2 id="Bug详细解释"><a href="#Bug详细解释" class="headerlink" title="Bug详细解释"></a>Bug详细解释</h2><p>通过上面的逐步分析，已经可以明显的直到原因是什么了：</p>
+<h2 id="Bug详细解释"><a href="#Bug详细解释" class="headerlink" title="Bug详细解释"></a>Bug详细解释</h2><p>通过上面的逐步分析，已经可以明显的知道原因是什么了：</p>
 <p><code>子进程</code>在执行的过程中会向标准I/O的缓冲区中写入<code>标准输出</code>和<code>错误输出</code>，而主进程没有对子进程的<code>错误输出</code>进行处理，导致子进程发现<code>错误输出</code>缓冲区满了的时候自己阻塞住，无法继续运行。而主进程因为子进程无法运行结束，所以<code>getInputStream()</code>一直认为还会有数据，会一直等待来自子进程的<code>标准输出</code>，所以也阻塞在了<code>getInputStream()</code>。 程序中没有任何的超时机制，java进程阻塞住，所以docker也就阻塞住了。</p>
 <h2 id="解决-amp-引入新的bug"><a href="#解决-amp-引入新的bug" class="headerlink" title="解决&amp;引入新的bug"></a>解决&amp;引入新的bug</h2><p>关键点就是 要及时处理子进程的<code>标准输出</code>和<code>错误输出</code>,因此我们可以启动两个线程分别去处理两个输出，然后主进程等待子进程运行结束就可以了，关键代码如下：</p>
 <pre class="line-numbers language-java"><code class="language-java">ExecutorService single <span class="token operator">=</span> Executors<span class="token punctuation">.</span><span class="token function">newCachedThreadPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//启动个线程池</span>
