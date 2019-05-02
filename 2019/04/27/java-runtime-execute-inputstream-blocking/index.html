@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>java-runtime-execute-inputstream-blocking</title>
+	<title>项目中java创建子进程造成的I/O阻塞问题定位和解决</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -99,7 +99,7 @@
 					
 	
 		<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">		
-			java-runtime-execute-inputstream-blocking		
+			项目中java创建子进程造成的I/O阻塞问题定位和解决		
 		</a>
 	
 
@@ -120,7 +120,11 @@
 						
 							<i class="fa fa-tags"></i>
 							
-								<a href="#tags" title="tags" rel="1">tags</a>&nbsp;
+								<a href="#Java" title="Java" rel="3">Java</a>&nbsp;
+							
+								<a href="#Bug解决" title="Bug解决" rel="2">Bug解决</a>&nbsp;
+							
+								<a href="#开发" title="开发" rel="3">开发</a>&nbsp;
 													 											
 						
 					</span>
@@ -130,10 +134,9 @@
 			<div class="am-article-bd">
 				<div class="content" id="post-content">
 					
-						<p>记录一个没遇到过的java调用进程出现bug的debug过程，bug起因是调度后台启动一个异步任务去调用一个docker容器包裹的工具服务（mutation变异测试工具），正常运行的情况下docker容器会正常的退出并自我销毁。而这次的现象是docker容器没有退出而一直处于运行状态。</p>
+						<p>记录一个bug的debug过程，bug起因是<code>后台调度程序</code>启动一个异步任务去调用一个docker容器包裹的工具服务（mutation变异测试工具），正常运行的情况下docker容器会正常的退出并自我销毁。而这次的现象是docker容器没有退出而一直处于运行状态。</p>
 <a id="more"></a>
-<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><h3 id="docker下手"><a href="#docker下手" class="headerlink" title="docker下手"></a>docker下手</h3><p><code>docker</code>未停止 -&gt; docker所做的事情没有结束</p>
-<p><code>docker exec</code>进入容器,用jps查看java进程状态，果然发现进程并没有运行结束</p>
+<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><h3 id="docker下手"><a href="#docker下手" class="headerlink" title="docker下手"></a>docker下手</h3><p>分析<code>docker</code>未停止的原因大概率是docker所做的事情没有结束。所以，<code>docker exec</code>进入容器，用<code>jps</code>查看<code>Java进程</code>状态，果然发现进程并没有运行结束。</p>
 <h3 id="观察java进程"><a href="#观察java进程" class="headerlink" title="观察java进程"></a>观察java进程</h3><ol>
 <li><code>jps</code>观察现象，有两个java进程在运行，<code>pid=430</code>就是我们的主进程，<code>pid=300</code>是主进程内新启动的一个子进程。<pre class="line-numbers language-bash"><code class="language-bash">300 MutationTestMinion
 430 Jps
@@ -148,13 +151,13 @@ Process p <span class="token operator">=</span> Runtime<span class="token punctu
 output <span class="token operator">=</span> IOUtils<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 </li>
-<li><p>查看<code>Process</code>的文档，查看各种博客：</p>
+<li><p>查看<code>Process</code>的文档和各种博客：</p>
 </li>
 </ol>
-<p><strong>比较有用的信息：</strong></p>
+<p><strong>收集的有用的信息：</strong></p>
 <ul>
-<li>创建Process方式有两种： ① ProcessBuilder ② Runtime</li>
-<li>创建的Process没有自己的终端和控制台，他们的标准I/O（stdin,stdout,stderr）会被重定向给父进程，为此Process提供了方法<code>getOutputStream()</code>,<code>getInputStream()</code>,<code>getErrorStream()</code></li>
+<li>创建<code>Process</code>方式有两种： ① <code>ProcessBuilder</code>; ② <code>Runtime</code>.</li>
+<li>创建的<code>Process</code>没有自己的终端和控制台，他们的<code>标准I/O（stdin,stdout,stderr）</code>会被重定向给父进程，为此Process提供了方法<code>getOutputStream()</code>,<code>getInputStream()</code>,<code>getErrorStream()</code>来实现这个功能。</li>
 <li><strong>重点：</strong> 由于各平台对于标准I/O 设置了有限制的缓冲区大小。导致写入缓冲区可能会发生阻塞或者死锁的现象！！！原文：<pre class="line-numbers language-java"><code class="language-java"><span class="token comment" spellcheck="true">/*
 * The parent process uses these streams to feed input to and get output
 * from the subprocess.  Because some native platforms only provide
@@ -165,8 +168,8 @@ output <span class="token operator">=</span> IOUtils<span class="token punctuati
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 </ul>
-<h2 id="Bug详细解释"><a href="#Bug详细解释" class="headerlink" title="Bug详细解释"></a>Bug详细解释</h2><p>两个进程： 主进程，执行任务的子进程。</p>
-<p>子进程在执行的过程中会向标准I/O的缓冲区中写入<code>标准输出</code>和<code>错误输出</code>，而主进程没有对子进程的<code>错误输出</code>进行处理，导致子进程发现<code>错误输出</code>缓冲区满了，自己阻塞住，无法继续运行。而主进程因为子进程无法运行结束，所以一直认为还会有数据，会一直等待来自子进程的<code>标准输出</code>也阻塞在了<code>getInputStream()</code>。 程序中没有任何的超时机制，java进程阻塞住，所以docker也就阻塞住了。</p>
+<h2 id="Bug详细解释"><a href="#Bug详细解释" class="headerlink" title="Bug详细解释"></a>Bug详细解释</h2><p>通过上面的逐步分析，已经可以明显的直到原因是什么了：</p>
+<p><code>子进程</code>在执行的过程中会向标准I/O的缓冲区中写入<code>标准输出</code>和<code>错误输出</code>，而主进程没有对子进程的<code>错误输出</code>进行处理，导致子进程发现<code>错误输出</code>缓冲区满了的时候自己阻塞住，无法继续运行。而主进程因为子进程无法运行结束，所以<code>getInputStream()</code>一直认为还会有数据，会一直等待来自子进程的<code>标准输出</code>，所以也阻塞在了<code>getInputStream()</code>。 程序中没有任何的超时机制，java进程阻塞住，所以docker也就阻塞住了。</p>
 <h2 id="解决-amp-引入新的bug"><a href="#解决-amp-引入新的bug" class="headerlink" title="解决&amp;引入新的bug"></a>解决&amp;引入新的bug</h2><p>关键点就是 要及时处理子进程的<code>标准输出</code>和<code>错误输出</code>,因此我们可以启动两个线程分别去处理两个输出，然后主进程等待子进程运行结束就可以了，关键代码如下：</p>
 <pre class="line-numbers language-java"><code class="language-java">ExecutorService single <span class="token operator">=</span> Executors<span class="token punctuation">.</span><span class="token function">newCachedThreadPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//启动个线程池</span>
 Future<span class="token operator">&lt;</span>String<span class="token operator">></span> errorOutput <span class="token operator">=</span> single<span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> IOUtils<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span><span class="token function">getErrorStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -175,8 +178,8 @@ single<span class="token punctuation">.</span><span class="token function">shutd
 p<span class="token punctuation">.</span><span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//主线程挂起，等子进程结束</span>
 output <span class="token operator">=</span> inputOutput<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 获取输出结果</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我在写这个代码的时候引入了一个新的bug,没有手动关闭线程池,导致我有一段时间怀疑我之前看的文档和bug分析是不是错的，所以又去复现了一波，发现子进程已经运行结束了，主进程park在了<code>addWorker()</code>, 幸好因为面试看过线程池源码，确认是线程池阻塞等待任务的问题。有机会再总结一波线程池相关的源码分析。</p>
-<p>线程池在确认没有任务加入的时候一定要手动关闭<code>shutdown()</code>,否则会导致主进程因为有后台线程在运行的缘故，无法运行结束，造成的结果也是docker阻塞住，其实就是线程池在等待处理新的task而进行的自旋阻塞。</p>
+<p>程序首先启动了一个线程池，添加了两个任务分别去处理标出输出和错误输出。然后关闭线程池，拒绝新的任务加入进来，主进程等待子进程运行结束后，再去获取线程池中的线程中的运行输出结果。</p>
+<p>我在写这个代码的时候引入了一个新的bug,就是没有手动关闭线程池,导致我有一段时间怀疑我之前看的文档和bug分析是不是错的，所以又去复现了一波，发现处理任务的子进程已经运行结束了，主进程park在了<code>addWorker()</code>, 线程池在确认没有任务加入的时候一定要手动关闭<code>shutdown()</code>,否则会导致主进程因为有后台线程在运行的缘故，无法运行结束，造成的结果也是docker阻塞住，其实就是线程池在等待处理新的task而进行的自旋阻塞。幸好因为面试看过线程池源码，确认是线程池阻塞在等待任务的问题。所以多看源码还是对自己很有帮助的，有机会再总结一波线程池相关的源码分析。</p>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
 <li>Java doc</li>
 <li><a href="https://blog.csdn.net/yuanzihui/article/details/51093375" target="_blank" rel="noopener">Process.getInputStream()阻塞问题</a></li>
