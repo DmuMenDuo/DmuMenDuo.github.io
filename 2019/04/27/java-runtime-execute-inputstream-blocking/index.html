@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>文章归档</title>
+	<title>java-runtime-execute-inputstream-blocking</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -87,177 +87,247 @@
 		<!-- content srart -->
 <div class="am-g am-g-fixed blog-fixed blog-content">
 	<div class="am-u-md-8 am-u-sm-12">
-		<div class="archive">
 
-			<div class="blog-text-center">
-				
-					<i class="fa fa-book">总计11篇文章</i>
-				
-			</div>  
+		<article class="am-article blog-article-p">
 
-			
+			<div class="am-article-hd">
+				
 
-							
-				
-				
-				
+
+				<h1 class="am-article-title blog-text-center">
 					
+					
+	
+		<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">		
+			java-runtime-execute-inputstream-blocking		
+		</a>
+	
 
+				</h1>
+
+				<p class="am-article-meta blog-text-center">
+					<span>
+						<i class="fa fa-clock-o"></i> 
+						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">
+	<time datetime="2019-04-27T15:36:26.000Z" itemprop="datePublished">
+  		2019-04-27
+  </time>
+</a>    
+&nbsp;
+					</span>
 					
-					<!--<a href="/archives/2019" class="archive-year">2019</a>-->
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2019/04">
-							2019-04
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">java-runtime-execute-inputstream-blocking</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">04-27</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-								
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2019/04/21/int-with-integer/" itemprop="url">一道笔试题的思考:基本类型和包装类型进行数据比较的问题总结</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2019/04/21/int-with-integer/" itemprop="url">04-21</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2019/03">
-							2019-03
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">FileZip导致的JVM崩溃问题分析</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2019/03/10/filezip-cause-jvm-crush-md/" itemprop="url">03-10</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-					
+					<span>						
 						
-					
-
-					
-					<!--<a href="/archives/2018" class="archive-year">2018</a>-->
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2018/12">
-							2018-12
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2018/12/03/head-first-1-factory/" itemprop="url">headfirst设计模式-工厂和抽象工厂笔记</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2018/12/03/head-first-1-factory/" itemprop="url">12-03</a>
-					</div>
-				</div>		        							
+							<i class="fa fa-tags"></i>
 							
-				
-				
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2018/08">
-							2018-08
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2018/08/10/qinghai5day/" itemprop="url">青海小憩</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2018/08/10/qinghai5day/" itemprop="url">08-10</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-					
+								<a href="#tags" title="tags" rel="1">tags</a>&nbsp;
+													 											
 						
+					</span>
+				</p>
+			</div>
+
+			<div class="am-article-bd">
+				<div class="content" id="post-content">
 					
+						<p>记录一个没遇到过的java调用进程出现bug的debug过程，bug起因是调度后台启动一个异步任务去调用一个docker容器包裹的工具服务（mutation变异测试工具），正常运行的情况下docker容器会正常的退出并自我销毁。而这次的现象是docker容器没有退出而一直处于运行状态。</p>
+<a id="more"></a>
+<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><h3 id="docker下手"><a href="#docker下手" class="headerlink" title="docker下手"></a>docker下手</h3><p><code>docker</code>未停止 -&gt; docker所做的事情没有结束</p>
+<p><code>docker exec</code>进入容器,用jps查看java进程状态，果然发现进程并没有运行结束</p>
+<h3 id="观察java进程"><a href="#观察java进程" class="headerlink" title="观察java进程"></a>观察java进程</h3><ol>
+<li><code>jps</code>观察现象，有两个java进程在运行，<code>pid=430</code>就是我们的主进程，<code>pid=300</code>是主进程内新启动的一个子进程。<pre class="line-numbers language-bash"><code class="language-bash">300 MutationTestMinion
+430 Jps
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li><code>jstask [pid]</code> 查看两个进程的线程栈。<br><strong>查看主进程的线程栈日志如下:</strong><br><img src="http://pic.menduo.xyz/20190501204936.png" alt="主进程"><br><strong>查看子进程的线程栈日志如下:</strong><br><img src="http://pic.menduo.xyz/20190501212950.png" alt="子进程"><br><strong>现象：</strong><br>主线程正在读取inputStream,子线程正在写入outputStream。两个进程均阻塞住，无法继续运行。</li>
+</ol>
+<h3 id="分析代码"><a href="#分析代码" class="headerlink" title="分析代码"></a>分析代码</h3><ol>
+<li><p>拉代码，本地定位到具体的关键代码如下（比查bug更痛苦的就是查别的的bug了）</p>
+<pre class="line-numbers language-java"><code class="language-java">String<span class="token punctuation">[</span><span class="token punctuation">]</span> commands <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"bash"</span><span class="token punctuation">,</span> <span class="token string">"-c"</span><span class="token punctuation">,</span> commandStr<span class="token punctuation">}</span><span class="token punctuation">;</span>
+Process p <span class="token operator">=</span> Runtime<span class="token punctuation">.</span><span class="token function">getRuntime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span>commands<span class="token punctuation">)</span><span class="token punctuation">;</span>
+output <span class="token operator">=</span> IOUtils<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+</li>
+<li><p>查看<code>Process</code>的文档，查看各种博客：</p>
+</li>
+</ol>
+<p><strong>比较有用的信息：</strong></p>
+<ul>
+<li>创建Process方式有两种： ① ProcessBuilder ② Runtime</li>
+<li>创建的Process没有自己的终端和控制台，他们的标准I/O（stdin,stdout,stderr）会被重定向给父进程，为此Process提供了方法<code>getOutputStream()</code>,<code>getInputStream()</code>,<code>getErrorStream()</code></li>
+<li><strong>重点：</strong> 由于各平台对于标准I/O 设置了有限制的缓冲区大小。导致写入缓冲区可能会发生阻塞或者死锁的现象！！！原文：<pre class="line-numbers language-java"><code class="language-java"><span class="token comment" spellcheck="true">/*
+* The parent process uses these streams to feed input to and get output
+* from the subprocess.  Because some native platforms only provide
+* limited buffer size for standard input and output streams, failure
+* to promptly write the input stream or read the output stream of
+* the subprocess may cause the subprocess to block, or even deadlock.
+*/</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<h2 id="Bug详细解释"><a href="#Bug详细解释" class="headerlink" title="Bug详细解释"></a>Bug详细解释</h2><p>两个进程： 主进程，执行任务的子进程。</p>
+<p>子进程在执行的过程中会向标准I/O的缓冲区中写入<code>标准输出</code>和<code>错误输出</code>，而主进程没有对子进程的<code>错误输出</code>进行处理，导致子进程发现<code>错误输出</code>缓冲区满了，自己阻塞住，无法继续运行。而主进程因为子进程无法运行结束，所以一直认为还会有数据，会一直等待来自子进程的<code>标准输出</code>也阻塞在了<code>getInputStream()</code>。 程序中没有任何的超时机制，java进程阻塞住，所以docker也就阻塞住了。</p>
+<h2 id="解决-amp-引入新的bug"><a href="#解决-amp-引入新的bug" class="headerlink" title="解决&amp;引入新的bug"></a>解决&amp;引入新的bug</h2><p>关键点就是 要及时处理子进程的<code>标准输出</code>和<code>错误输出</code>,因此我们可以启动两个线程分别去处理两个输出，然后主进程等待子进程运行结束就可以了，关键代码如下：</p>
+<pre class="line-numbers language-java"><code class="language-java">ExecutorService single <span class="token operator">=</span> Executors<span class="token punctuation">.</span><span class="token function">newCachedThreadPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//启动个线程池</span>
+Future<span class="token operator">&lt;</span>String<span class="token operator">></span> errorOutput <span class="token operator">=</span> single<span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> IOUtils<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span><span class="token function">getErrorStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Future<span class="token operator">&lt;</span>String<span class="token operator">></span> inputOutput <span class="token operator">=</span> single<span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> IOUtils<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+single<span class="token punctuation">.</span><span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 这里一定要主动关闭线程池。</span>
+p<span class="token punctuation">.</span><span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//主线程挂起，等子进程结束</span>
+output <span class="token operator">=</span> inputOutput<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 获取输出结果</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我在写这个代码的时候引入了一个新的bug,没有手动关闭线程池,导致我有一段时间怀疑我之前看的文档和bug分析是不是错的，所以又去复现了一波，发现子进程已经运行结束了，主进程park在了<code>addWorker()</code>, 幸好因为面试看过线程池源码，确认是线程池阻塞等待任务的问题。有机会再总结一波线程池相关的源码分析。</p>
+<p>线程池在确认没有任务加入的时候一定要手动关闭<code>shutdown()</code>,否则会导致主进程因为有后台线程在运行的缘故，无法运行结束，造成的结果也是docker阻塞住，其实就是线程池在等待处理新的task而进行的自旋阻塞。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li>Java doc</li>
+<li><a href="https://blog.csdn.net/yuanzihui/article/details/51093375" target="_blank" rel="noopener">Process.getInputStream()阻塞问题</a></li>
+</ol>
 
 					
-					<!--<a href="/archives/2017" class="archive-year">2017</a>-->
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2017/12">
-							2017-12
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">使用Docker-Java动态的获取Container的log日志</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">12-13</a>
-					</div>
-				</div>		        							
-			
-				
-			
-	<ul class="am-pagination">
-		
-		
-		
-			<li class="am-pagination-next">
-				<a href="/archives/page/2/"> 下一页 &raquo; </a>
-			</li>
-		
-	</ul>
+				</div>
+			</div>
+		</article>
+
+		<ul class="am-pagination">
     
-		</div>
-	</div>
+	
+		<li class="am-pagination-next">
+		<a class="pull-right" href="/2019/04/21/int-with-integer/" title="一道笔试题的思考:基本类型和包装类型进行数据比较的问题总结">
+			下一篇 &raquo;
+		</a>
+		</li>
+	 
+ </ul>
+        
+
+		<div class="theme-annie-comment-button-container">
+	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
+		加载评论
+		<!--加载评论-->
+	</button>
 </div>
 
+<div id="annie-comment-container" class="theme-annie-comment-main-container">
+
+	
+		
+			<!-- comment gitalk -->
+			<!-- show gitalk comment -->
+
+  <div id="gitalk-container"></div>
+
+
+<!-- gitalk`s css & js -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<link rel="stylesheet" href="/css/comment.css">
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<script type="text/javascript">
+	//thanks O-R
+	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
+	//去除尾部匹配正则数组的字符串  
+	//remove redundant characters
+	String.prototype.trimEnd = function(regStr) {
+		var result = this;
+		if(regStr == undefined || regStr == null || regStr == "") {
+			return result;
+		}
+		var array = regStr.split(',');
+
+		if(array.length > 0) {
+
+			var c = array.shift();
+			var str = this;
+			var i = str.length;
+			var rg = new RegExp(c);
+			var matchArr = str.match(rg);
+
+			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
+				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
+					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
+					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
+					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
+					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
+					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
+					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
+				matchStr = matchStr + '$';
+				result = str.replace(new RegExp(matchStr), "");
+			}
+
+			if(array.length > 0) {
+				return result.trimEnd(array.join())
+			} else {
+				return result;
+			}
+		}
+	};
+
+	//create gitalk
+	var gitalk = new Gitalk({
+		clientID: '097e5f5792a7f81b5f45',
+		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
+		//id: window.location.pathname,
+		// id: (window.location.pathname).split("/").pop().substring(0, 49),
+		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
+		repo: 'comments',
+		owner: 'DmuMenDuo',
+		admin: 'DmuMenDuo',
+		distractionFreeMode: 'true',
+	})
+	gitalk.render('gitalk-container');
+</script>
+		
+	
+
+</div>
+
+<script type="text/javascript">
+	/* Show Comment */
+	var Annie_Comment = function() {
+		function Show_Hidden(obj) {
+			obj.style.display = 'block';
+		}
+		
+		//var obutton = $('#annie-comment-button');
+		//var obutton = $('#annie-comment-container');
+		var obutton = document.getElementById("annie-comment-button" || "0");
+		var odiv = document.getElementById("annie-comment-container");
+		if( 'obutton' ) {
+			obutton.onclick = function() {
+				Show_Hidden(odiv);
+				$("#annie-comment-button").css("display", 'none');
+				return false;
+			}
+		}
+	};
+
+	(function Annie_Init() {
+		Annie_Comment();
+	})();
+</script>
+		
+		<!--
+	时间：2018-09-24
+	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
+-->
+
+	
+		<aside class="post-widget">
+			<nav class="post-toc-wrap" id="post-toc">
+				
+					<strong>文章目录</strong>
+				
+				
+				<!--toc(post.content)-->
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原因分析"><span class="post-toc-text">原因分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#docker下手"><span class="post-toc-text">docker下手</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#观察java进程"><span class="post-toc-text">观察java进程</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分析代码"><span class="post-toc-text">分析代码</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Bug详细解释"><span class="post-toc-text">Bug详细解释</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#解决-amp-引入新的bug"><span class="post-toc-text">解决&amp;引入新的bug</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-text">参考资料</span></a></li></ol>
+			</nav>
+			<div class="post-toc-bar"><div>
+		</div></div></aside>
+	
+
+	</div>
+</div>
 		</div>
 		</main>
 		
@@ -324,6 +394,11 @@
 	}
 </style>
 <!-- 
+
+	<script src="/js/motto.js"></script>
+	<script type="text/javascript">
+		$(".motto").html(getMingYanContent());
+	</script>	
  -->
 
 
@@ -667,6 +742,8 @@
 	<script type="text/javascript" src="/js/love.js"></script>
 
 
+
+	<script type="text/javascript" src="/js/toc.js"></script>
 
 
 <script type="text/javascript" src="/js/main.js"></script>
