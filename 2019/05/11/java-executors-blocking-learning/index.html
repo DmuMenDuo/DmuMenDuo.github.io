@@ -1,0 +1,991 @@
+<!--
+	作者：Sariay
+	时间：2018-09-25
+	描述：There may be a bug, but don't worry, QiLing(器灵) says that it can work normally!
+-->
+
+
+	<!DOCTYPE html>
+	<html>
+		
+
+<head><meta name="generator" content="Hexo 3.8.0">
+	<title>线程池中的阻塞队列知识点总结</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-title" content="Amaze UI">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta name="author" content="men duo">
+    <meta name="keywords" content>
+    <meta name="description" content>
+   	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+
+	<!-- favicon -->
+	<link href="/img/favicon.ico" rel="Shortcut Icon" type="image/ico">
+	
+	<!-- font-awesome -->
+	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+	<body>	
+		<!--Preloader-->
+<div id="preloader">
+	<div id="status">
+		<img alt="PRELOADER" src="/img/logo.png">
+	</div>
+</div>
+<!--Preloader end-->
+
+<!-- header -->	
+<header id="header-bg-2">
+	
+		<div id="cd-logo"><a href="/"><img src="/img/logo.png" alt="Logo"></a></div>
+	
+	
+
+</header>
+
+<!-- nav -->
+<div id="cd-nav">
+	<a href="#0" title="menu" class="cd-nav-trigger"><span></span></a>
+
+	<nav id="cd-main-nav">
+		<ul>
+			
+      		<li class="fa fa-/">
+           		<a href="/" title="主页">主页</a>	
+      		</li>
+    		
+      		<li class="fa fa-/archives">
+           		<a href="/archives" title="归档">归档</a>	
+      		</li>
+    		
+      		<li class="fa fa-/categories">
+           		<a href="/categories" title="分类">分类</a>	
+      		</li>
+    		
+      		<li class="fa fa-/tags">
+           		<a href="/tags" title="标签">标签</a>	
+      		</li>
+    		
+      		<li class="fa fa-/about">
+           		<a href="/about" title="关于">关于</a>	
+      		</li>
+    		
+    		
+        	
+            	<li class="fa fa-/search"><a href="javascript:;" class="popup-trigger" title="Search">搜索</a></li>
+        	
+		</ul>
+	</nav>
+</div>
+
+		<!--main-->
+		<main> 
+		<div class="page-container">
+		<!-- content srart -->
+<div class="am-g am-g-fixed blog-fixed blog-content">
+	<div class="am-u-md-8 am-u-sm-12">
+
+		<article class="am-article blog-article-p">
+
+			<div class="am-article-hd">
+				
+
+
+				<h1 class="am-article-title blog-text-center">
+					
+					
+	
+		<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">		
+			线程池中的阻塞队列知识点总结		
+		</a>
+	
+
+				</h1>
+
+				<p class="am-article-meta blog-text-center">
+					<span>
+						<i class="fa fa-clock-o"></i> 
+						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">
+	<time datetime="2019-05-11T06:16:36.000Z" itemprop="datePublished">
+  		2019-05-11
+  </time>
+</a>    
+&nbsp;
+					</span>
+					
+					<span>						
+						
+							<i class="fa fa-tags"></i>
+							
+								<a href="#Java" title="Java" rel="4">Java</a>&nbsp;
+							
+								<a href="#线程池" title="线程池" rel="1">线程池</a>&nbsp;
+							
+								<a href="#阻塞队列" title="阻塞队列" rel="1">阻塞队列</a>&nbsp;
+							
+								<a href="#BlockingQueue" title="BlockingQueue" rel="1">BlockingQueue</a>&nbsp;
+													 											
+						
+					</span>
+				</p>
+			</div>
+
+			<div class="am-article-bd">
+				<div class="content" id="post-content">
+					
+						<p>多看源码多思考，秋招offer少不了。hhhhh,下面是自己花了几天时间看了线程池中的队列参数的源码总结，主要是自己对于阻塞队列的一些思考产生的疑问，以及看源码和其他参考资料得到的答案。</p>
+<p>本文主要从线程池出发，具体了解一下其使用的各种不同的阻塞队列底层「放入」和「取出」是如何实现的。最后，具体介绍同步阻塞队列<code>SynchronousQueue</code>的底层实现和在线程池中的应用。</p>
+<p>通过本文：我可以收获到的是—-一个线程池参数：阻塞队列的相关知识。</p>
+<p>——————❤️——————❤️——————</p>
+<a id="more"></a>
+<h2 id="线程池中的阻塞队列知识点总结"><a href="#线程池中的阻塞队列知识点总结" class="headerlink" title="线程池中的阻塞队列知识点总结"></a>线程池中的阻塞队列知识点总结</h2><p>队列是线程池创建的一个重要参数，java提供了几种不同数据结构实现的阻塞队列，应对不同的线程池需求要选取适合的队列作为参数。<br><img src="http://pic.menduo.xyz/20190511232556.png" alt="阻塞队列"></p>
+<h3 id="几种阻塞队列简要介绍"><a href="#几种阻塞队列简要介绍" class="headerlink" title="几种阻塞队列简要介绍"></a>几种阻塞队列简要介绍</h3><ul>
+<li><code>ArrayBlockingQueue</code>：是一个基于数组结构的有界阻塞队列，此队列按 FIFO（先进先出）原则对元素进行排序。 <code>数组</code></li>
+<li><code>LinkedBlockingQueue</code>：一个基于链表结构的阻塞队列，此队列按FIFO （先进先出） 排序元素，吞吐量通常要高于ArrayBlockingQueue。静态工厂方法Executors.newFixedThreadPool()使用了这个队列 <code>链表</code></li>
+<li><code>SynchronousQueue</code>：一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，吞吐量通常要高于LinkedBlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。 <code>双端队列和双端栈两种</code></li>
+<li><code>PriorityBlockingQueue</code>：一个具有优先级的无限阻塞队列。<code>堆</code></li>
+</ul>
+<h3 id="线程池中的阻塞队列的一些思考"><a href="#线程池中的阻塞队列的一些思考" class="headerlink" title="线程池中的阻塞队列的一些思考"></a>线程池中的阻塞队列的一些思考</h3><ol>
+<li>线程池中的阻塞队列是做什么的？</li>
+<li>队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？</li>
+<li>阻塞队列可以放入Null吗？</li>
+<li>无界阻塞阻塞队列长度真的是无大小限制的吗？</li>
+<li>阻塞队列的put和take如果自己写应该如何实现？</li>
+</ol>
+<h4 id="1-线程池中的阻塞队列是做什么的？"><a href="#1-线程池中的阻塞队列是做什么的？" class="headerlink" title="1. 线程池中的阻塞队列是做什么的？"></a>1. 线程池中的阻塞队列是做什么的？</h4><p>用于存放实现了<code>Runnable接口</code>的可以被<code>工作线程worker</code>执行的<code>任务task</code>。四种不同的阻塞队列分别可以对应多种不同的实际使用场景。</p>
+<h4 id="2-队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？"><a href="#2-队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？" class="headerlink" title="2. 队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？"></a>2. 队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？</h4><p>看线程池的源码会发现是<code>offer()</code>和<code>remove()</code>，对，没错！用了两个非阻塞的方法。。。如果是有界阻塞队列，在队列满了的情况下执行<code>offer()</code>将<code>command</code>放入阻塞队列，会直接返回<code>false</code>。看下面的代码：</p>
+<pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">execute</span><span class="token punctuation">(</span>Runnable command<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>command <span class="token operator">==</span> null<span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">int</span> c <span class="token operator">=</span> ctl<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">workerCountOf</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token operator">&lt;</span> corePoolSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">addWorker</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token keyword">return</span><span class="token punctuation">;</span>
+            c <span class="token operator">=</span> ctl<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isRunning</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> workQueue<span class="token punctuation">.</span><span class="token function">offer</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//① offer</span>
+            <span class="token keyword">int</span> recheck <span class="token operator">=</span> ctl<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span> <span class="token function">isRunning</span><span class="token punctuation">(</span>recheck<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token function">remove</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//② remove</span>
+                <span class="token function">reject</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">workerCountOf</span><span class="token punctuation">(</span>recheck<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> 
+                <span class="token function">addWorker</span><span class="token punctuation">(</span>null<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">addWorker</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//加入队列失败，在放worker试试，不行再拒绝也不晚。（worker弹性扩容）</span>
+            <span class="token function">reject</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>offer()</code>和<code>remove()</code>方法，在成功的时候会返回<code>true</code>,放入失败则返回<code>false</code>。所以这个是一种非阻塞的模式。为什么是非阻塞的<code>offer()</code>和<code>remove()</code>而不是使用阻塞的<code>put</code>和<code>take</code>？</p>
+<p><strong>A：</strong> 我是这样考虑的，如果放不下就阻塞，那么会出现大量提交<code>task</code>线程堆积阻塞的情况，而线程池就是为了复用线程，它只是为了用几个一直运行的<code>worker</code>线程去调用实现<code>Runnable接口</code>的对象的<code>run()</code>方法。所以在队列放不下的情况应该直接返回，对于失败的情况应该自己用拒绝策略去处理。这样提交task的线程就不会产生堆积。<code>run()</code>是无返回的的，不用阻塞，<code>call()</code>有自己的处理机制，可以阻塞。</p>
+<h4 id="3-阻塞队列可以放入Null吗？"><a href="#3-阻塞队列可以放入Null吗？" class="headerlink" title="3. 阻塞队列可以放入Null吗？"></a>3. 阻塞队列可以放入Null吗？</h4><p><code>null</code> 被用来作为 <code>poll</code> 操作失败的饭返回的值，为了避免这个操作的二意性，所以不允许放入<code>null</code>。</p>
+<pre class="line-numbers language-java"><code class="language-java"> <span class="token comment" spellcheck="true">/*
+ * &lt;p>A {@code BlockingQueue} does not accept {@code null} elements.
+ * Implementations throw {@code NullPointerException} on attempts
+ * to {@code add}, {@code put} or {@code offer} a {@code null}.  A
+ * {@code null} is used as a sentinel value to indicate failure of
+ * {@code poll} operations.
+ */</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="4-无界阻塞阻塞队列长度真的是无大小限制的吗？"><a href="#4-无界阻塞阻塞队列长度真的是无大小限制的吗？" class="headerlink" title="4. 无界阻塞阻塞队列长度真的是无大小限制的吗？"></a>4. 无界阻塞阻塞队列长度真的是无大小限制的吗？</h4><p>看了下LinkedBlockingQueue的构造函数,不设置初试长度，那么其值为整型的最大值</p>
+<pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> <span class="token function">LinkedBlockingQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">(</span>Integer<span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token function">LinkedBlockingQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>capacity <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>capacity <span class="token operator">=</span> capacity<span class="token punctuation">;</span>
+        last <span class="token operator">=</span> head <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token operator">&lt;</span>E<span class="token operator">></span><span class="token punctuation">(</span>null<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="5-阻塞队列的put和take如果自己写应该如何实现？"><a href="#5-阻塞队列的put和take如果自己写应该如何实现？" class="headerlink" title="5. 阻塞队列的put和take如果自己写应该如何实现？"></a>5. 阻塞队列的put和take如果自己写应该如何实现？</h4><p>最简单的方式就是使用<code>互斥锁+条件</code>的方式，定义锁的两个条件（1. 队列满；2. 队列空）。put方法当出现<code>队列满</code>放不下的情况时当前线程阻塞，等待take操作产生的唤醒操作。简单写了下代码如下：</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BlockedQueue</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">int</span> size <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> ReentrantLock lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 锁</span>
+    <span class="token keyword">private</span> Condition fullCondition <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token keyword">private</span> Condition empyCondition <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> ArrayList<span class="token operator">&lt;</span>String<span class="token operator">></span> blockQ <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">put</span><span class="token punctuation">(</span>String x<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
+        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//多个put的线程阻塞在这里</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>blockQ<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">>=</span> size<span class="token punctuation">)</span> <span class="token punctuation">{</span>  <span class="token comment" spellcheck="true">// while 让获得锁的线程 阻塞在添加前，这样避免了死锁，换成if的话，它被唤醒的时候条件不成立导致add会出现超量的情况</span>
+            fullCondition<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        blockQ<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        empyCondition<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> String <span class="token function">take</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
+        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        String result <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>blockQ<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            empyCondition<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        result <span class="token operator">=</span> blockQ<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        fullCondition<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="关于SynchronousQueue"><a href="#关于SynchronousQueue" class="headerlink" title="关于SynchronousQueue"></a>关于SynchronousQueue</h3><p>写完上面的代码之后，我在想的一个问题是:我在上面用<code>ReentrantLock</code>实现的阻塞队列的<code>put</code>和<code>take</code>操作用了<code>条件+双锁</code>的模式。这样阻塞的方式会造成的问题就在于如果同时多个线程去<code>put</code>数据，只会有一个线程获得锁，其他线程进入ReentrantLock的等待队列中等待被唤醒，这样会造成线程的频繁切换，消耗大量的CPU资源。</p>
+<p>线程池中的几种阻塞队列中，<code>ArrayBlockingQueue</code>,<code>LinkedBlockingQueue</code>,<code>PriorityBlockingQueue</code> 都是使用上面的<code>双锁</code>的方式实现的。</p>
+<p>而<code>SynchronousQueue</code>的实现却和上面几个阻塞队列的实现完全不同，它的实现方式是什么，为什么要这样子实现？</p>
+<h4 id="1-理解SynchronousQueue是什么"><a href="#1-理解SynchronousQueue是什么" class="headerlink" title="1. 理解SynchronousQueue是什么?"></a>1. 理解SynchronousQueue是什么?</h4><p><code>SynchronousQueue</code>同步阻塞队列，同步意味着放入和取出操作总是成对出现的，也就是说put一个object,就一定对应着一个take操作，配对成功两个线程才会继续运行。这样子抽象看的话就没有任何一个元素是放到队列里，队列一直处于一种又满又空的状态。这样子可以理解为同步阻塞队列的队列长度一直是0。</p>
+<p>所以<code>SynchronousQueue</code>的peek()为null,isEmpty()为true等等。</p>
+<pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> E <span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其实理解什么是<code>SynchronousQueue</code>之后，我们可以用<code>ArrayBlockingQueue</code>设置队列长度为<code>1</code>来实现一个乞丐版的<code>SynchronousQueue</code>。这样做造成的两个问题：</p>
+<ol>
+<li>就是频繁的加锁和解锁操作，涉及了线程频繁切换。</li>
+<li>吞吐量只有1，线程池完全串行化了，没有办法进行并行操作。</li>
+</ol>
+<p>所以jdk6之后的采用了一种无锁算法来优化上面两个问题。</p>
+<p>无锁算法解决上面的问题：</p>
+<ul>
+<li>这种无锁算法(更多内容见参考资料)定义了两种数据结构。保证公平的FIFO队列，和非公平的LIFO栈。</li>
+<li>队列和栈中保存的节点存在三种状态，REQUEST(消费者)，DATA（生产者），FULLFILLING(消费者和生产者匹配成功）。这就是不用加锁的原因，在多线程下，每个线程可以通过状态来处理自己产生的节点，同时也可以处理其他线程产生的状态（帮助他移出fullfiling节点或者进行匹配），数据的状态以及CAS操作保证了多线程争用情况下的线程安全。具体看下面的代码。</li>
+</ul>
+<h4 id="2-SynchronousQueue的无锁同步算法"><a href="#2-SynchronousQueue的无锁同步算法" class="headerlink" title="2. SynchronousQueue的无锁同步算法"></a>2. SynchronousQueue的无锁同步算法</h4><p>用于保证put和take成对出现的核心方法就是transfer()，这个方法的语义：线程A把一个元素E交给线程B，或者线程A从线程B中拿到元素E。</p>
+<p>主要进行三种不同状态之间的变换：</p>
+<ol>
+<li>head节点状态和当前要加入的节点状态相同（都是生产者或者都是消费者），则要把当前线程作为节点加入到栈中，并更新head指向当前节点（考虑竞争情况下，使用原子的CAS操作）</li>
+<li>如果head节点是不是fullfilling,则将当前节点标记Fullfiling状态并加入到栈中，更新head节点和匹配节点的match值。然后返回结果就可以了，自己可以不用处理队列状态了。</li>
+<li>如果当前节点是fullfiling节点，移出fullfilling以及和它match的成对节点，下个额循环在处理自己这个节点。</li>
+</ol>
+<blockquote>
+<p>下面的代码是非公平的栈的实现：</p>
+</blockquote>
+<pre class="line-numbers language-java"><code class="language-java">E <span class="token function">transfer</span><span class="token punctuation">(</span>E e<span class="token punctuation">,</span> <span class="token keyword">boolean</span> timed<span class="token punctuation">,</span> <span class="token keyword">long</span> nanos<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">//栈的模式</span>
+            SNode s <span class="token operator">=</span> null<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// constructed/reused as needed</span>
+            <span class="token keyword">int</span> mode <span class="token operator">=</span> <span class="token punctuation">(</span>e <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token operator">?</span> REQUEST <span class="token operator">:</span> DATA<span class="token punctuation">;</span>  <span class="token comment" spellcheck="true">//REQUEST:请求拿到一个值，DATA请求放一个值</span>
+
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                SNode h <span class="token operator">=</span> head<span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>h <span class="token operator">==</span> null <span class="token operator">||</span> h<span class="token punctuation">.</span>mode <span class="token operator">==</span> mode<span class="token punctuation">)</span> <span class="token punctuation">{</span>  <span class="token comment" spellcheck="true">// empty or same-mode</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>timed <span class="token operator">&amp;&amp;</span> nanos <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>      <span class="token comment" spellcheck="true">// can't wait</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>h <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> h<span class="token punctuation">.</span><span class="token function">isCancelled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                            <span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> h<span class="token punctuation">.</span>next<span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment" spellcheck="true">// pop cancelled node</span>
+                        <span class="token keyword">else</span>
+                            <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> s <span class="token operator">=</span> <span class="token function">snode</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> e<span class="token punctuation">,</span> h<span class="token punctuation">,</span> mode<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//cas操作将当前节点设置到head</span>
+                        SNode m <span class="token operator">=</span> <span class="token function">awaitFulfill</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> timed<span class="token punctuation">,</span> nanos<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//自旋、阻塞等匹配的节点</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>m <span class="token operator">==</span> s<span class="token punctuation">)</span> <span class="token punctuation">{</span>               <span class="token comment" spellcheck="true">// wait was cancelled</span>
+                            <span class="token function">clean</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>h <span class="token operator">=</span> head<span class="token punctuation">)</span> <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> h<span class="token punctuation">.</span>next <span class="token operator">==</span> s<span class="token punctuation">)</span>
+                            <span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> s<span class="token punctuation">.</span>next<span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment" spellcheck="true">// help s's fulfiller</span>
+                        <span class="token keyword">return</span> <span class="token punctuation">(</span>E<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>mode <span class="token operator">==</span> REQUEST<span class="token punctuation">)</span> <span class="token operator">?</span> m<span class="token punctuation">.</span>item <span class="token operator">:</span> s<span class="token punctuation">.</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">isFulfilling</span><span class="token punctuation">(</span>h<span class="token punctuation">.</span>mode<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// try to fulfill</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>h<span class="token punctuation">.</span><span class="token function">isCancelled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>            <span class="token comment" spellcheck="true">// already cancelled</span>
+                        <span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> h<span class="token punctuation">.</span>next<span class="token punctuation">)</span><span class="token punctuation">;</span>         <span class="token comment" spellcheck="true">// pop and retry</span>
+                    <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> s<span class="token operator">=</span><span class="token function">snode</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> e<span class="token punctuation">,</span> h<span class="token punctuation">,</span> FULFILLING<span class="token operator">|</span>mode<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// loop until matched or waiters disappear</span>
+                            SNode m <span class="token operator">=</span> s<span class="token punctuation">.</span>next<span class="token punctuation">;</span>       <span class="token comment" spellcheck="true">// m is s's match</span>
+                            <span class="token keyword">if</span> <span class="token punctuation">(</span>m <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// all waiters are gone</span>
+                                <span class="token function">casHead</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment" spellcheck="true">// pop fulfill node</span>
+                                s <span class="token operator">=</span> null<span class="token punctuation">;</span>           <span class="token comment" spellcheck="true">// use new node next time</span>
+                                <span class="token keyword">break</span><span class="token punctuation">;</span>              <span class="token comment" spellcheck="true">// restart main loop</span>
+                            <span class="token punctuation">}</span>
+                            SNode mn <span class="token operator">=</span> m<span class="token punctuation">.</span>next<span class="token punctuation">;</span>
+                            <span class="token keyword">if</span> <span class="token punctuation">(</span>m<span class="token punctuation">.</span><span class="token function">tryMatch</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                                <span class="token function">casHead</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> mn<span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment" spellcheck="true">// pop both s and m</span>
+                                <span class="token keyword">return</span> <span class="token punctuation">(</span>E<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>mode <span class="token operator">==</span> REQUEST<span class="token punctuation">)</span> <span class="token operator">?</span> m<span class="token punctuation">.</span>item <span class="token operator">:</span> s<span class="token punctuation">.</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token punctuation">}</span> <span class="token keyword">else</span>                  <span class="token comment" spellcheck="true">// lost match</span>
+                                s<span class="token punctuation">.</span><span class="token function">casNext</span><span class="token punctuation">(</span>m<span class="token punctuation">,</span> mn<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment" spellcheck="true">// help unlink</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>                            <span class="token comment" spellcheck="true">// help a fulfiller</span>
+                    SNode m <span class="token operator">=</span> h<span class="token punctuation">.</span>next<span class="token punctuation">;</span>               <span class="token comment" spellcheck="true">// m is h's match</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>m <span class="token operator">==</span> null<span class="token punctuation">)</span>                  <span class="token comment" spellcheck="true">// waiter is gone</span>
+                        <span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment" spellcheck="true">// pop fulfilling node</span>
+                    <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                        SNode mn <span class="token operator">=</span> m<span class="token punctuation">.</span>next<span class="token punctuation">;</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>m<span class="token punctuation">.</span><span class="token function">tryMatch</span><span class="token punctuation">(</span>h<span class="token punctuation">)</span><span class="token punctuation">)</span>          <span class="token comment" spellcheck="true">// help match</span>
+                            <span class="token function">casHead</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> mn<span class="token punctuation">)</span><span class="token punctuation">;</span>         <span class="token comment" spellcheck="true">// pop both h and m</span>
+                        <span class="token keyword">else</span>                        <span class="token comment" spellcheck="true">// lost match</span>
+                            h<span class="token punctuation">.</span><span class="token function">casNext</span><span class="token punctuation">(</span>m<span class="token punctuation">,</span> mn<span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment" spellcheck="true">// help unlink</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="3-线程池里是如何使用SynchronousQueue"><a href="#3-线程池里是如何使用SynchronousQueue" class="headerlink" title="3. 线程池里是如何使用SynchronousQueue?"></a>3. 线程池里是如何使用SynchronousQueue?</h4><p>线程池的工厂类<code>Executors</code>创建的<code>CachedThreadPool</code>的队列选择就是<code>SynchronousQueue</code>。<code>CachedThreadPool</code>线程池的特性就是弹性的扩张，当有<code>task</code>进来的时候，就会分配一个<code>worker</code>来运行这个<code>task</code>;如果没有可用<code>worker</code>就会new一个新的<code>worker</code>。当<code>worker</code>空闲一段时间后，还会自动销毁。</p>
+<h5 id="3-1-首先看一下创建CachedThreadPool的工厂方法。默认情况下-核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue"><a href="#3-1-首先看一下创建CachedThreadPool的工厂方法。默认情况下-核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue" class="headerlink" title="3.1. 首先看一下创建CachedThreadPool的工厂方法。默认情况下,核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue"></a>3.1. 首先看一下创建<code>CachedThreadPool</code>的工厂方法。默认情况下,核心池大小为0（初始化不创建worker）。核心池设置为最大值。<code>worker</code>存活时间为60s。阻塞队列为<code>SynchronousQueue</code></h5><pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> <span class="token keyword">static</span> ExecutorService <span class="token function">newCachedThreadPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPoolExecutor</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> Integer<span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">,</span>
+                                      60L<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>SECONDS<span class="token punctuation">,</span>
+                                      <span class="token keyword">new</span> <span class="token class-name">SynchronousQueue</span><span class="token operator">&lt;</span>Runnable<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h5 id="3-2-然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况-offer操作一定都是返回false的。线程池如何处理这个offer进来的task的"><a href="#3-2-然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况-offer操作一定都是返回false的。线程池如何处理这个offer进来的task的" class="headerlink" title="3.2. 然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况,offer操作一定都是返回false的。线程池如何处理这个offer进来的task的?"></a>3.2. 然后我一直在想的一个问题是，<code>SynchronousQueue</code>队列长度为0，<code>SynchronousQueue</code>的<code>offer</code>操作如果碰到<code>队列满</code>的情况会直接返回<code>false</code>。所以在线程池工作最开始的时间是<code>没有woker</code>的情况,<code>offer</code>操作一定都是返回<code>false</code>的。线程池如何处理这个<code>offer</code>进来的<code>task</code>的?</h5><p><strong>A:</strong>看了下源码：在<code>①</code>这个位置根据上面<code>SynchronousQueue</code>的特性如果明确知道这里的判断为<code>false</code>，所以走了<code>②</code>，<code>add</code>了一个新的<code>worker</code>。</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">execute</span><span class="token punctuation">(</span>Runnable command<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>command <span class="token operator">==</span> null<span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> c <span class="token operator">=</span> ctl<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">workerCountOf</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token operator">&lt;</span> corePoolSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">addWorker</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token keyword">return</span><span class="token punctuation">;</span>
+            c <span class="token operator">=</span> ctl<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isRunning</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> workQueue<span class="token punctuation">.</span><span class="token function">offer</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//①</span>
+            <span class="token keyword">int</span> recheck <span class="token operator">=</span> ctl<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span> <span class="token function">isRunning</span><span class="token punctuation">(</span>recheck<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token function">remove</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token function">reject</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">workerCountOf</span><span class="token punctuation">(</span>recheck<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token function">addWorker</span><span class="token punctuation">(</span>null<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">addWorker</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//②</span>
+            <span class="token function">reject</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h5 id="3-3-worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？-这个问题蠢吗。。我其实想了好久才想明白的"><a href="#3-3-worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？-这个问题蠢吗。。我其实想了好久才想明白的" class="headerlink" title="3.3. worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？(这个问题蠢吗。。我其实想了好久才想明白的)"></a>3.3. worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？(这个问题蠢吗。。我其实想了好久才想明白的)</h5><p><strong>A:</strong> 看源码可以发现是会阻塞住，会在<code>SynchronousQueue</code>中加入一个<code>take</code>节点,他会等待一个<code>offer</code>节点match自己。同时<code>keepAliveTime</code>woker的存活时间也是在这里发挥的作用。</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">private</span> Runnable <span class="token function">getTask</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">boolean</span> timedOut <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Did the last poll() time out?</span>
+
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">//...略</span>
+            <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                <span class="token comment" spellcheck="true">//①</span>
+                Runnable r <span class="token operator">=</span> timed <span class="token operator">?</span>
+                    workQueue<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span>keepAliveTime<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>NANOSECONDS<span class="token punctuation">)</span> <span class="token operator">:</span>
+                    workQueue<span class="token punctuation">.</span><span class="token function">take</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>r <span class="token operator">!=</span> null<span class="token punctuation">)</span>
+                    <span class="token keyword">return</span> r<span class="token punctuation">;</span>
+                timedOut <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> retry<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                timedOut <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a href="http://www.cs.rochester.edu/research/synchronization/pseudocode/duals.html" target="_blank" rel="noopener">非阻塞实现</a></li>
+<li><a href="https://www.ibm.com/developerworks/cn/java/j-jtp04186/" target="_blank" rel="noopener">非阻塞算法简介</a></li>
+<li><a href="https://www.cnblogs.com/duanxz/p/3252267.html" target="_blank" rel="noopener">SynchronousQueue简介</a></li>
+<li><a href="https://blog.csdn.net/u011518120/article/details/53906484" target="_blank" rel="noopener">源码分析-SynchronousQueue</a></li>
+</ol>
+
+					
+				</div>
+			</div>
+		</article>
+
+		<ul class="am-pagination">
+    
+	
+		<li class="am-pagination-next">
+		<a class="pull-right" href="/2019/04/27/java-runtime-execute-inputstream-blocking/" title="项目中java创建子进程造成的I/O阻塞问题定位和解决">
+			下一篇 &raquo;
+		</a>
+		</li>
+	 
+ </ul>
+        
+
+		<div class="theme-annie-comment-button-container">
+	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
+		加载评论
+		<!--加载评论-->
+	</button>
+</div>
+
+<div id="annie-comment-container" class="theme-annie-comment-main-container">
+
+	
+		
+			<!-- comment gitalk -->
+			<!-- show gitalk comment -->
+
+  <div id="gitalk-container"></div>
+
+
+<!-- gitalk`s css & js -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<link rel="stylesheet" href="/css/comment.css">
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<script type="text/javascript">
+	//thanks O-R
+	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
+	//去除尾部匹配正则数组的字符串  
+	//remove redundant characters
+	String.prototype.trimEnd = function(regStr) {
+		var result = this;
+		if(regStr == undefined || regStr == null || regStr == "") {
+			return result;
+		}
+		var array = regStr.split(',');
+
+		if(array.length > 0) {
+
+			var c = array.shift();
+			var str = this;
+			var i = str.length;
+			var rg = new RegExp(c);
+			var matchArr = str.match(rg);
+
+			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
+				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
+					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
+					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
+					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
+					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
+					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
+					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
+				matchStr = matchStr + '$';
+				result = str.replace(new RegExp(matchStr), "");
+			}
+
+			if(array.length > 0) {
+				return result.trimEnd(array.join())
+			} else {
+				return result;
+			}
+		}
+	};
+
+	//create gitalk
+	var gitalk = new Gitalk({
+		clientID: '097e5f5792a7f81b5f45',
+		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
+		//id: window.location.pathname,
+		// id: (window.location.pathname).split("/").pop().substring(0, 49),
+		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
+		repo: 'comments',
+		owner: 'DmuMenDuo',
+		admin: 'DmuMenDuo',
+		distractionFreeMode: 'true',
+	})
+	gitalk.render('gitalk-container');
+</script>
+		
+	
+
+</div>
+
+<script type="text/javascript">
+	/* Show Comment */
+	var Annie_Comment = function() {
+		function Show_Hidden(obj) {
+			obj.style.display = 'block';
+		}
+		
+		//var obutton = $('#annie-comment-button');
+		//var obutton = $('#annie-comment-container');
+		var obutton = document.getElementById("annie-comment-button" || "0");
+		var odiv = document.getElementById("annie-comment-container");
+		if( 'obutton' ) {
+			obutton.onclick = function() {
+				Show_Hidden(odiv);
+				$("#annie-comment-button").css("display", 'none');
+				return false;
+			}
+		}
+	};
+
+	(function Annie_Init() {
+		Annie_Comment();
+	})();
+</script>
+		
+		<!--
+	时间：2018-09-24
+	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
+-->
+
+	
+		<aside class="post-widget">
+			<nav class="post-toc-wrap" id="post-toc">
+				
+					<strong>文章目录</strong>
+				
+				
+				<!--toc(post.content)-->
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#线程池中的阻塞队列知识点总结"><span class="post-toc-text">线程池中的阻塞队列知识点总结</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#几种阻塞队列简要介绍"><span class="post-toc-text">几种阻塞队列简要介绍</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#线程池中的阻塞队列的一些思考"><span class="post-toc-text">线程池中的阻塞队列的一些思考</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-线程池中的阻塞队列是做什么的？"><span class="post-toc-text">1. 线程池中的阻塞队列是做什么的？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？"><span class="post-toc-text">2. 队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-阻塞队列可以放入Null吗？"><span class="post-toc-text">3. 阻塞队列可以放入Null吗？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-无界阻塞阻塞队列长度真的是无大小限制的吗？"><span class="post-toc-text">4. 无界阻塞阻塞队列长度真的是无大小限制的吗？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-阻塞队列的put和take如果自己写应该如何实现？"><span class="post-toc-text">5. 阻塞队列的put和take如果自己写应该如何实现？</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#关于SynchronousQueue"><span class="post-toc-text">关于SynchronousQueue</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-理解SynchronousQueue是什么"><span class="post-toc-text">1. 理解SynchronousQueue是什么?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-SynchronousQueue的无锁同步算法"><span class="post-toc-text">2. SynchronousQueue的无锁同步算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-线程池里是如何使用SynchronousQueue"><span class="post-toc-text">3. 线程池里是如何使用SynchronousQueue?</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-1-首先看一下创建CachedThreadPool的工厂方法。默认情况下-核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue"><span class="post-toc-text">3.1. 首先看一下创建CachedThreadPool的工厂方法。默认情况下,核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-2-然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况-offer操作一定都是返回false的。线程池如何处理这个offer进来的task的"><span class="post-toc-text">3.2. 然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况,offer操作一定都是返回false的。线程池如何处理这个offer进来的task的?</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-3-worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？-这个问题蠢吗。。我其实想了好久才想明白的"><span class="post-toc-text">3.3. worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？(这个问题蠢吗。。我其实想了好久才想明白的)</span></a></li></ol></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-text">参考资料</span></a></li></ol>
+			</nav>
+			<div class="post-toc-bar"><div>
+		</div></div></aside>
+	
+
+	</div>
+</div>
+		</div>
+		</main>
+		
+		<!--footer-->
+		<footer>
+	<div class="blog-text-center">
+		<div class="theme-annie-social">
+				
+				
+					<a href="https://github.com/DmuMenDuo" title="Github" target="_blank"><i class="fa fa-github"></i>&nbsp;</a>
+					
+				
+				
+					<a href="mailto:menduo@smail.nju.edu.cn" title="Email" target="_blank"><i class="fa fa-envelope-o"></i>&nbsp;</a>
+					
+					
+						
+				
+		</div>
+	</div>
+
+	<div class="blog-text-center">
+		<div class="theme-annie-copyright">
+			
+				&copy; 2017 - 2019, content by men duo. All Rights Reserved.			       	
+			
+		</div>
+	</div>
+
+	<div class="blog-text-center">
+		<div class="theme-annie-copyright">
+		<a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> Theme <a href="https://github.com/Sariay/hexo-theme-Annie" title="Annie" target="_blank" rel="noopener">Annie</a> by Sariay.		
+		</div>
+		
+	</div>
+</footer>
+		<!-- <script src="http://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script> -->
+
+<script>
+	window.jQuery || document.write('<script src="/js/jquery-2.1.1.min.js"><\/script>')
+</script>
+
+<style>
+	.motto {
+		color: #ffffff;
+		font-size: 20px;
+		margin: 100px 25% 0;
+		width: 50%;
+		line-height: 1.4;
+		font-family:"KaiTi", "STXingkai", "Source Sans Pro", "Segoe UI", "Lucida Grande", Helvetica, Arial, "Microsoft YaHei", FreeSans, Arimo, "Droid Sans", "wenquanyi micro hei", "Hiragino Sans GB", "Hiragino Sans GB W3", FontAwesome, sans-serif;
+		text-align: center;
+	}
+	@media(max-width: 890px) {
+		.motto {	
+			margin: 100px 10% 0;
+			width: 80%;
+		}
+	}
+	@media(max-width: 890px) {
+		.motto {
+			margin: 100px 5% 0;
+			width: 90%;
+		}
+	}
+</style>
+<!-- 
+
+	<script src="/js/motto.js"></script>
+	<script type="text/javascript">
+		$(".motto").html(getMingYanContent());
+	</script>	
+ -->
+
+
+	<div class="popup search-popup local-search-popup">
+    <span class="popup-btn-close">
+      ESC
+    </span>
+    <div class="container">
+      <div class="col-md-8 col-md-offset-2">
+
+        <div class="local-search-header clearfix">
+            <span class="search-icon"></span>
+            <div class="local-search-input-wrapper">
+              <input autocomplete="off" placeholder="Search..." type="text" id="local-search-input">
+            </div>
+        </div>
+
+        <div id="local-search-result"></div>
+
+      </div>
+    </div>
+</div>
+
+<script src="/js/ziploader.js"></script>
+
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').fadeOut(300);
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $('.popup').fadeIn(300);
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // get search zip version
+    $.get('/searchVersion.txt?t=' + (+new Date()), function(res) {
+      if (localStorage.getItem('searchVersion') !== res) {
+        localStorage.setItem('searchVersion', res);
+        initSearchJson();
+      }
+    });
+
+    function initSearchJson () {
+      initLoad(['/search.zip'], {
+        loadOptions: {
+          success: function(obj) {
+            localStorage.setItem('searchJson', obj['search.json'])
+          },
+          error: function(e) {
+            return console.log(e)
+          }
+        },
+        returnOptions: {
+          'json': TYPE_TEXT
+        },
+        mimeOptions:{
+          'json':'application/json'
+        }
+      })
+    }
+
+    // search function;
+    var searchFunc = function(search_id, content_id) {
+      'use strict';
+
+      isfetched = true;
+      var datas = JSON.parse(localStorage.getItem('searchJson'));
+      console.log(search_id)
+      var input = document.getElementById(search_id);
+      var resultContent = document.getElementById(content_id);
+      var inputEventFunction = function() {
+        var searchText = input.value.trim().toLowerCase();
+        var keywords = searchText.split(/[\s\-]+/);
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        var resultItems = [];
+        if (searchText.length > 0) {
+          // perform local searching
+          datas.forEach(function(data) {
+            var isMatch = false;
+            var hitCount = 0;
+            var searchTextCount = 0;
+            var title = data.title ? data.title.trim() : '';
+            var titleInLowerCase = title.toLowerCase();
+            var content = data.content ? data.content.trim().replace(/<[^>]+>/g,"") : '';
+            var contentInLowerCase = content.toLowerCase();
+            var articleUrl = decodeURIComponent(data.url);
+            var indexOfTitle = [];
+            var indexOfContent = [];
+            // only match articles with not empty titles
+            keywords.forEach(function(keyword) {
+              function getIndexByWord(word, text, caseSensitive) {
+                var wordLen = word.length;
+                if (wordLen === 0) {
+                  return [];
+                }
+                var startPosition = 0, position = [], index = [];
+                if (!caseSensitive) {
+                  text = text.toLowerCase();
+                  word = word.toLowerCase();
+                }
+                while ((position = text.indexOf(word, startPosition)) > -1) {
+                  index.push({position: position, word: word});
+                  startPosition = position + wordLen;
+                }
+                return index;
+              }
+
+              indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+              indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+            });
+            if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+              isMatch = true;
+              hitCount = indexOfTitle.length + indexOfContent.length;
+            }
+
+            // show search results
+
+            if (isMatch) {
+              // sort index by position of keyword
+
+              [indexOfTitle, indexOfContent].forEach(function (index) {
+                index.sort(function (itemLeft, itemRight) {
+                  if (itemRight.position !== itemLeft.position) {
+                    return itemRight.position - itemLeft.position;
+                  } else {
+                    return itemLeft.word.length - itemRight.word.length;
+                  }
+                });
+              });
+
+              // merge hits into slices
+
+              function mergeIntoSlice(text, start, end, index) {
+                var item = index[index.length - 1];
+                var position = item.position;
+                var word = item.word;
+                var hits = [];
+                var searchTextCountInSlice = 0;
+                while (position + word.length <= end && index.length != 0) {
+                  if (word === searchText) {
+                    searchTextCountInSlice++;
+                  }
+                  hits.push({position: position, length: word.length});
+                  var wordEnd = position + word.length;
+
+                  // move to next position of hit
+
+                  index.pop();
+                  while (index.length != 0) {
+                    item = index[index.length - 1];
+                    position = item.position;
+                    word = item.word;
+                    if (wordEnd > position) {
+                      index.pop();
+                    } else {
+                      break;
+                    }
+                  }
+                }
+                searchTextCount += searchTextCountInSlice;
+                return {
+                  hits: hits,
+                  start: start,
+                  end: end,
+                  searchTextCount: searchTextCountInSlice
+                };
+              }
+
+              var slicesOfTitle = [];
+              if (indexOfTitle.length != 0) {
+                slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+              }
+
+              var slicesOfContent = [];
+              while (indexOfContent.length != 0) {
+                var item = indexOfContent[indexOfContent.length - 1];
+                var position = item.position;
+                var word = item.word;
+                // cut out 100 characters
+                var start = position - 20;
+                var end = position + 80;
+                if(start < 0){
+                  start = 0;
+                }
+                if (end < position + word.length) {
+                  end = position + word.length;
+                }
+                if(end > content.length){
+                  end = content.length;
+                }
+                slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+              }
+
+              // sort slices in content by search text's count and hits' count
+
+              slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                  return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                  return sliceRight.hits.length - sliceLeft.hits.length;
+                } else {
+                  return sliceLeft.start - sliceRight.start;
+                }
+              });
+
+              // select top N slices in content
+
+              var upperBound = parseInt('-1');
+              if (upperBound >= 0) {
+                slicesOfContent = slicesOfContent.slice(0, upperBound);
+              }
+
+              // highlight title and content
+
+              function highlightKeyword(text, slice) {
+                var result = '';
+                var prevEnd = slice.start;
+                slice.hits.forEach(function (hit) {
+                  result += text.substring(prevEnd, hit.position);
+                  var end = hit.position + hit.length;
+                  result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                  prevEnd = end;
+                });
+                result += text.substring(prevEnd, slice.end);
+                return result;
+              }
+
+              var resultItem = '';
+
+              if (slicesOfTitle.length != 0) {
+                resultItem += "<li><a target='_blank' href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+              } else {
+                resultItem += "<li><a target='_blank' href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+              }
+
+              slicesOfContent.forEach(function (slice) {
+                resultItem +=  "<p class=\"search-result\">" + highlightKeyword(content, slice) + "...</p>";
+              });
+
+              resultItem += "</li>";
+              resultItems.push({
+                item: resultItem,
+                searchTextCount: searchTextCount,
+                hitCount: hitCount,
+                id: resultItems.length
+              });
+            }
+          })
+        };
+        if (keywords.length === 1 && keywords[0] === "") {
+          resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+        } else if (resultItems.length === 0) {
+          resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /> no result </div>'
+        } else {
+          resultItems.sort(function (resultLeft, resultRight) {
+            if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+              return resultRight.searchTextCount - resultLeft.searchTextCount;
+            } else if (resultLeft.hitCount !== resultRight.hitCount) {
+              return resultRight.hitCount - resultLeft.hitCount;
+            } else {
+              return resultRight.id - resultLeft.id;
+            }
+          });
+          var searchResultList = '<ul class=\"search-result-list\">';
+          resultItems.forEach(function (result) {
+            searchResultList += result.item;
+          })
+          searchResultList += "</ul>";
+          resultContent.innerHTML = searchResultList;
+        }
+      }
+
+      if ('auto' === 'auto') {
+        input.addEventListener('input', inputEventFunction);
+      } else {
+        $('.search-icon').click(inputEventFunction);
+        input.addEventListener('keypress', function (event) {
+          if (event.keyCode === 13) {
+            inputEventFunction();
+          }
+        });
+      }
+
+      // remove loading animation
+      $('body').css('overflow', '');
+
+      proceedsearch();
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        $('.sb-close').click();
+        searchFunc('local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+	<script type="text/javascript" src="/js/love.js"></script>
+
+
+
+	<script type="text/javascript" src="/js/toc.js"></script>
+
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script type="text/javascript">
+	//generate a random img that pre_name 'from 0 to 110'
+	//var random_bg = Math.floor(Math.random() * 9 + 1);
+
+	//var bg = 'url(/img/random/' + random_bg + '.jpg)';		
+	//var bg = 'url(' + 2 + '.jpg)';
+
+	//$("#header-bg-2").css("background-image", bg);
+</script>
+		
+		<!--back to top-->
+        <style type="text/css">
+	#totop {
+		background: white;
+		border-radius: 50%;
+		position: fixed;
+		right: 5.4%;
+		bottom: 80px;
+		cursor: pointer;
+	}
+	
+	#totop a {
+		color: #474747;
+		background-color: transparent;
+		padding: 10px;
+		text-decoration: none;
+	}
+	
+	@media(max-width:512px) {
+		#totop {
+			display: none;
+			visibility: hidden;
+		}
+	}
+</style>
+
+
+	<div id="totop">
+  		<a href="javascript:;" class="fa fa-arrow-up"></a>
+	</div>
+
+	</body>
+	</html>
+

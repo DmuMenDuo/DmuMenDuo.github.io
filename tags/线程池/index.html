@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>使用Docker-Java动态的获取Container的log日志</title>
+	<title>tag: 线程池</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -87,253 +87,50 @@
 		<!-- content srart -->
 <div class="am-g am-g-fixed blog-fixed blog-content">
 	<div class="am-u-md-8 am-u-sm-12">
+		<div class="archive">
 
-		<article class="am-article blog-article-p">
-
-			<div class="am-article-hd">
+			<div class="blog-text-center">
 				
-
-
-				<h1 class="am-article-title blog-text-center">
-					
-					
-	
-		<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">		
-			使用Docker-Java动态的获取Container的log日志		
-		</a>
-	
-
-				</h1>
-
-				<p class="am-article-meta blog-text-center">
-					<span>
-						<i class="fa fa-clock-o"></i> 
-						<a href="/2017/12/13/get-log-from-docker-container/" itemprop="url">
-	<time datetime="2017-12-13T15:21:16.000Z" itemprop="datePublished">
-  		2017-12-13
-  </time>
-</a>    
-&nbsp;
-					</span>
-					
-					<span>						
-						
-							<i class="fa fa-tags"></i>
-							
-								<a href="#docker-java" title="docker-java" rel="1">docker-java</a>&nbsp;
-							
-								<a href="#bug解决" title="bug解决" rel="1">bug解决</a>&nbsp;
-							
-								<a href="#开发" title="开发" rel="3">开发</a>&nbsp;
-							
-								<a href="#日志" title="日志" rel="2">日志</a>&nbsp;
-													 											
-						
-					</span>
-				</p>
-			</div>
-
-			<div class="am-article-bd">
-				<div class="content" id="post-content">
-					
-						<p>docker-java 是 JAVA 操作Docker Remote API 的一个工具。最近项目需要读取容器的运行日志出来。记录一下自己遇到的问题。更多其他的问题可以参考他们的测试用例。</p>
-<blockquote>
-<p>github地址: <a href="https://github.com/docker-java/docker-java" target="_blank" rel="noopener">docker-java</a> 目前版本 3.0.13</p>
-</blockquote>
-<a id="more"></a>
-<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="1-首先要开启docker的客户端-我电脑-ubuntu16-04"><a href="#1-首先要开启docker的客户端-我电脑-ubuntu16-04" class="headerlink" title="1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)"></a>1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)</h4><pre class="line-numbers language-bash"><code class="language-bash"><span class="token comment" spellcheck="true">#查看配置文件位于哪里</span>
-systemctl show --property<span class="token operator">=</span>FragmentPath docker 
-<span class="token comment" spellcheck="true">#编辑配置文件内容，接收所有ip请求</span>
-<span class="token function">sudo</span> gedit /lib/systemd/system/docker.service  
-ExecStart<span class="token operator">=</span>/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://127.0.0.1:8787
-<span class="token comment" spellcheck="true"># 这样配置的目的是可以通过http的方式进行远程访问，如果不需要的话可以通过自带的sock方式本地访问</span>
-<span class="token comment" spellcheck="true">#重新加载配置文件，重启docker daemon</span>
-<span class="token function">sudo</span> systemctl daemon-reload     
-<span class="token function">sudo</span> systemctl restart docker 
-
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="2-建工程-amp-amp-pom-xml引入依赖"><a href="#2-建工程-amp-amp-pom-xml引入依赖" class="headerlink" title="2. 建工程 &amp;&amp; pom.xml引入依赖"></a>2. 建工程 &amp;&amp; pom.xml引入依赖</h4><pre class="line-numbers language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>com.github.docker-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>docker-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>3.0.13<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="获取容器实时运行结果"><a href="#获取容器实时运行结果" class="headerlink" title="获取容器实时运行结果"></a>获取容器实时运行结果</h3><blockquote>
-<p>通过查看容器日志的方式,<br>设置一个回调函数，重写onNext(),就可以取到运行的结果了</p>
-</blockquote>
-<pre class="line-numbers language-java"><code class="language-java">dockerClient<span class="token punctuation">.</span><span class="token function">logContainerCmd</span><span class="token punctuation">(</span>dockerId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withStdOut</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withStdErr</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
-                    <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">LogContainerResultCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                        <span class="token annotation punctuation">@Override</span>
-                        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">onNext</span><span class="token punctuation">(</span>Frame item<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                            <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">onNext</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"容器运行的结果："</span><span class="token operator">+</span>item<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-                        <span class="token punctuation">}</span>
-                        <span class="token annotation punctuation">@Override</span>
-                        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">onComplete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                            <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">onComplete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token punctuation">}</span>
-                    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">awaitCompletion</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<blockquote>
-<p><code>awaitComletion()</code>就是让查日志进程阻塞，直到进程调用onComlete()<br>最好等容器停止后再去读，因为容器在运行中可能还没产生日志，但callback读的时候以为读完了，直接执行onComplete就结束了，因此没有输出。 所以建议查日志前，检查一下容器运行情况，代码如下：之后一直循环判断直到容器停止就可以了</p>
-</blockquote>
-<pre class="line-numbers language-java"><code class="language-java">    <span class="token comment" spellcheck="true">//获取容器的运行状态</span>
-    dockerClient<span class="token punctuation">.</span><span class="token function">inspectContainerCmd</span><span class="token punctuation">(</span>dockerId<span class="token punctuation">)</span><span class="token punctuation">.</span>
-                <span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getRunning</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-
-					
-				</div>
-			</div>
-		</article>
-
-		<ul class="am-pagination">
-    
-    	<li class="am-pagination-prev">
-   		<a class="pull-left" href="/2018/08/10/qinghai5day/" title="青海小憩">
-      		&laquo; 上一篇
-		</a>
-		</li>
-	
-	
-		<li class="am-pagination-next">
-		<a class="pull-right" href="/2017/10/10/trans-jvm-structure/" title="翻译文章:JVM架构简析">
-			下一篇 &raquo;
-		</a>
-		</li>
-	 
- </ul>
-        
-
-		<div class="theme-annie-comment-button-container">
-	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
-		加载评论
-		<!--加载评论-->
-	</button>
-</div>
-
-<div id="annie-comment-container" class="theme-annie-comment-main-container">
-
-	
-		
-			<!-- comment gitalk -->
-			<!-- show gitalk comment -->
-
-  <div id="gitalk-container"></div>
-
-
-<!-- gitalk`s css & js -->
-<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
-<link rel="stylesheet" href="/css/comment.css">
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
-<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-<script type="text/javascript">
-	//thanks O-R
-	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
-	//去除尾部匹配正则数组的字符串  
-	//remove redundant characters
-	String.prototype.trimEnd = function(regStr) {
-		var result = this;
-		if(regStr == undefined || regStr == null || regStr == "") {
-			return result;
-		}
-		var array = regStr.split(',');
-
-		if(array.length > 0) {
-
-			var c = array.shift();
-			var str = this;
-			var i = str.length;
-			var rg = new RegExp(c);
-			var matchArr = str.match(rg);
-
-			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
-				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
-					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
-					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
-					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
-					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
-					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
-					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
-					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
-				matchStr = matchStr + '$';
-				result = str.replace(new RegExp(matchStr), "");
-			}
-
-			if(array.length > 0) {
-				return result.trimEnd(array.join())
-			} else {
-				return result;
-			}
-		}
-	};
-
-	//create gitalk
-	var gitalk = new Gitalk({
-		clientID: '097e5f5792a7f81b5f45',
-		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
-		//id: window.location.pathname,
-		// id: (window.location.pathname).split("/").pop().substring(0, 49),
-		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
-		repo: 'comments',
-		owner: 'DmuMenDuo',
-		admin: 'DmuMenDuo',
-		distractionFreeMode: 'true',
-	})
-	gitalk.render('gitalk-container');
-</script>
-		
-	
-
-</div>
-
-<script type="text/javascript">
-	/* Show Comment */
-	var Annie_Comment = function() {
-		function Show_Hidden(obj) {
-			obj.style.display = 'block';
-		}
-		
-		//var obutton = $('#annie-comment-button');
-		//var obutton = $('#annie-comment-container');
-		var obutton = document.getElementById("annie-comment-button" || "0");
-		var odiv = document.getElementById("annie-comment-container");
-		if( 'obutton' ) {
-			obutton.onclick = function() {
-				Show_Hidden(odiv);
-				$("#annie-comment-button").css("display", 'none');
-				return false;
-			}
-		}
-	};
-
-	(function Annie_Init() {
-		Annie_Comment();
-	})();
-</script>
-		
-		<!--
-	时间：2018-09-24
-	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
--->
-
-	
-		<aside class="post-widget">
-			<nav class="post-toc-wrap" id="post-toc">
+					<i class="fa fa-book">线程池</i>
 				
-					<strong>文章目录</strong>
+			</div>  
+
+			
+
+							
 				
 				
-				<!--toc(post.content)-->
-				<ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#准备工作"><span class="post-toc-text">准备工作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-首先要开启docker的客户端-我电脑-ubuntu16-04"><span class="post-toc-text">1. 首先要开启docker的客户端 (我电脑 ubuntu16.04)</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-建工程-amp-amp-pom-xml引入依赖"><span class="post-toc-text">2. 建工程 &amp;&amp; pom.xml引入依赖</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#获取容器实时运行结果"><span class="post-toc-text">获取容器实时运行结果</span></a></li></ol>
-			</nav>
-			<div class="post-toc-bar"><div>
-		</div></div></aside>
-	
+				
+					
 
+					
+					<!--<a href="/archives/2019" class="archive-year">2019</a>-->
+				
+								
+				
+					  
+					<div class="archive-year">
+						<a href="/archives/2019/05">
+							2019-05
+						</a>
+					</div>				
+				  
+				
+				<div class="archive-item">
+					<div class="archive-post-title">									
+						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">线程池中的阻塞队列知识点总结</a>
+					</div>
+					<div class="archive-post-time">
+						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">05-11</a>
+					</div>
+				</div>		        							
+			
+				
+			    
+		</div>
 	</div>
 </div>
+
 		</div>
 		</main>
 		
@@ -400,11 +197,6 @@ ExecStart<span class="token operator">=</span>/usr/bin/dockerd -H unix:///var/ru
 	}
 </style>
 <!-- 
-
-	<script src="/js/motto.js"></script>
-	<script type="text/javascript">
-		$(".motto").html(getMingYanContent());
-	</script>	
  -->
 
 
@@ -748,8 +540,6 @@ ExecStart<span class="token operator">=</span>/usr/bin/dockerd -H unix:///var/ru
 	<script type="text/javascript" src="/js/love.js"></script>
 
 
-
-	<script type="text/javascript" src="/js/toc.js"></script>
 
 
 <script type="text/javascript" src="/js/main.js"></script>
