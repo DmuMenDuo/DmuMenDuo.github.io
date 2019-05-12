@@ -122,9 +122,9 @@
 							
 								<a href="#Java" title="Java" rel="4">Java</a>&nbsp;
 							
-								<a href="#开发" title="开发" rel="3">开发</a>&nbsp;
-							
 								<a href="#Bug解决" title="Bug解决" rel="2">Bug解决</a>&nbsp;
+							
+								<a href="#开发" title="开发" rel="3">开发</a>&nbsp;
 													 											
 						
 					</span>
@@ -135,6 +135,7 @@
 				<div class="content" id="post-content">
 					
 						<p>记录一个bug的debug过程，bug起因是<code>后台调度程序</code>启动一个异步任务去调用一个docker容器包裹的工具服务（mutation变异测试工具），正常运行的情况下docker容器会正常的退出并自我销毁。而这次的现象是docker容器没有退出而一直处于运行状态。</p>
+<p>❤️——————❤️</p>
 <a id="more"></a>
 <h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><h3 id="docker下手"><a href="#docker下手" class="headerlink" title="docker下手"></a>docker下手</h3><p>分析<code>docker</code>未停止的原因大概率是docker所做的事情没有结束。所以，<code>docker exec</code>进入容器，用<code>jps</code>查看<code>Java进程</code>状态，果然发现进程并没有运行结束。</p>
 <h3 id="观察java进程"><a href="#观察java进程" class="headerlink" title="观察java进程"></a>观察java进程</h3><ol>
@@ -419,10 +420,10 @@ output <span class="token operator">=</span> inputOutput<span class="token punct
 </footer>
 		<!-- <script src="http://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script> -->
 
-<script>
+<!-- <script>
 	window.jQuery || document.write('<script src="/js/jquery-2.1.1.min.js"><\/script>')
-</script>
-
+</script> -->
+<script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
 <style>
 	.motto {
 		color: #ffffff;
