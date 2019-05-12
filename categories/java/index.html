@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>category: Java</title>
+	<title>category: java</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -91,7 +91,7 @@
 
 			<div class="blog-text-center">
 				
-					<i class="fa fa-book">Java</i>
+					<i class="fa fa-book">java</i>
 				
 			</div>  
 
@@ -104,61 +104,24 @@
 					
 
 					
-					<!--<a href="/archives/2019" class="archive-year">2019</a>-->
+					<!--<a href="/archives/2017" class="archive-year">2017</a>-->
 				
 								
 				
 					  
 					<div class="archive-year">
-						<a href="/archives/2019/05">
-							2019-05
+						<a href="/archives/2017/10">
+							2017-10
 						</a>
 					</div>				
 				  
 				
 				<div class="archive-item">
 					<div class="archive-post-title">									
-						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">线程池中的阻塞队列知识点总结</a>
+						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">翻译文章:JVM架构简析</a>
 					</div>
 					<div class="archive-post-time">
-						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">05-11</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-								
-				
-					  
-					<div class="archive-year">
-						<a href="/archives/2019/04">
-							2019-04
-						</a>
-					</div>				
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">项目中java创建子进程造成的I/O阻塞问题定位和解决</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">04-27</a>
-					</div>
-				</div>		        							
-							
-				
-				
-				
-								
-				  
-				
-				<div class="archive-item">
-					<div class="archive-post-title">									
-						<a href="/2019/04/21/int-with-integer/" itemprop="url">一道笔试题的思考:基本类型和包装类型进行数据比较的问题总结</a>
-					</div>
-					<div class="archive-post-time">
-						<a href="/2019/04/21/int-with-integer/" itemprop="url">04-21</a>
+						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">10-10</a>
 					</div>
 				</div>		        							
 			
@@ -563,6 +526,69 @@
     });
     $(document).on('keyup', function (event) {
       var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+	<script type="text/javascript" src="/js/love.js"></script>
+
+
+
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script type="text/javascript">
+	//generate a random img that pre_name 'from 0 to 110'
+	//var random_bg = Math.floor(Math.random() * 9 + 1);
+
+	//var bg = 'url(/img/random/' + random_bg + '.jpg)';		
+	//var bg = 'url(' + 2 + '.jpg)';
+
+	//$("#header-bg-2").css("background-image", bg);
+</script>
+		
+		<!--back to top-->
+        <style type="text/css">
+	#totop {
+		background: white;
+		border-radius: 50%;
+		position: fixed;
+		right: 5.4%;
+		bottom: 80px;
+		cursor: pointer;
+	}
+	
+	#totop a {
+		color: #474747;
+		background-color: transparent;
+		padding: 10px;
+		text-decoration: none;
+	}
+	
+	@media(max-width:512px) {
+		#totop {
+			display: none;
+			visibility: hidden;
+		}
+	}
+</style>
+
+
+	<div id="totop">
+  		<a href="javascript:;" class="fa fa-arrow-up"></a>
+	</div>
+
+	</body>
+	</html>
+
+ich === 27 &&
         $('.search-popup').is(':visible');
       if (shouldDismissSearchPopup) {
         onPopupClose();
