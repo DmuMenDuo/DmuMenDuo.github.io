@@ -1,0 +1,37 @@
+<!--Preloader-->
+<div id="preloader">
+	<div id="status">
+		<img alt="PRELOADER" src="<%- config.root %>img/logo.png">
+	</div>
+</div>
+<!--Preloader end-->
+
+<!-- header -->	
+<header id="header-bg-2">
+	<% if(theme.avtor) { %>
+		<div id="cd-logo"><a href="<%- config.root %>"><img src="<%- url_for(theme.avtor) %>" alt="Logo"></a></div>
+	<% } else { %>
+		<div id="cd-logo"><a href="<%- config.root %>"><%= theme.say %></a></div>		
+	<% } %>
+	
+
+</header>
+
+<!-- nav -->
+<div id="cd-nav">
+	<a href="#0" title="menu" class="cd-nav-trigger"><span></span></a>
+
+	<nav id="cd-main-nav">
+		<ul>
+			<% for (var i in theme.menu){ %>
+      		<li class="fa fa-<%= theme.menu[i] %>">
+           		<%- link_to(url_for(theme.menu[i]), i, { external: false})%>	
+      		</li>
+    		<%}%>
+    		
+        	<% if (theme.local_search.enable) { %>
+            	<li class="fa fa-/search"><a href="javascript:;" class="popup-trigger" title="Search"><%= __('search') %></a></li>
+        	<% } %>
+		</ul>
+	</nav>
+</div>
