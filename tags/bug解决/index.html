@@ -601,7 +601,31 @@
 	</body>
 	</html>
 
-2 + '.jpg)';
+smissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+	<script type="text/javascript" src="/js/love.js"></script>
+
+
+
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script type="text/javascript">
+	//generate a random img that pre_name 'from 0 to 110'
+	//var random_bg = Math.floor(Math.random() * 9 + 1);
+
+	//var bg = 'url(/img/random/' + random_bg + '.jpg)';		
+	//var bg = 'url(' + 2 + '.jpg)';
 
 	//$("#header-bg-2").css("background-image", bg);
 </script>

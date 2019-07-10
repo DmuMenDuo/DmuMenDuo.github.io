@@ -1,0 +1,1002 @@
+<!--
+	作者：Sariay
+	时间：2018-09-25
+	描述：There may be a bug, but don't worry, QiLing(器灵) says that it can work normally!
+-->
+
+
+	<!DOCTYPE html>
+	<html>
+		
+
+<head><meta name="generator" content="Hexo 3.8.0">
+	<title>一个lambda的表达式是如何在java中执行的</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="apple-mobile-web-app-title" content="Amaze UI">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta name="author" content="men duo">
+    <meta name="keywords" content>
+    <meta name="description" content>
+   	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+
+	<!-- favicon -->
+	<link href="/img/favicon.ico" rel="Shortcut Icon" type="image/ico">
+	
+	<!-- font-awesome -->
+	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+	<body>	
+		<!--Preloader-->
+<div id="preloader">
+	<div id="status">
+		<img alt="PRELOADER" src="/img/logo.png">
+	</div>
+</div>
+<!--Preloader end-->
+
+<!-- header -->	
+<header id="header-bg-2">
+	
+		<div id="cd-logo"><a href="/"><img src="/img/logo.png" alt="Logo"></a></div>
+	
+	
+
+</header>
+
+<!-- nav -->
+<div id="cd-nav">
+	<a href="#0" title="menu" class="cd-nav-trigger"><span></span></a>
+
+	<nav id="cd-main-nav">
+		<ul>
+			
+      		<li class="fa fa-/">
+           		<a href="/" title="主页">主页</a>	
+      		</li>
+    		
+      		<li class="fa fa-/archives">
+           		<a href="/archives" title="归档">归档</a>	
+      		</li>
+    		
+      		<li class="fa fa-/categories">
+           		<a href="/categories" title="分类">分类</a>	
+      		</li>
+    		
+      		<li class="fa fa-/tags">
+           		<a href="/tags" title="标签">标签</a>	
+      		</li>
+    		
+      		<li class="fa fa-/about">
+           		<a href="/about" title="关于">关于</a>	
+      		</li>
+    		
+    		
+        	
+            	<li class="fa fa-/search"><a href="javascript:;" class="popup-trigger" title="Search">搜索</a></li>
+        	
+		</ul>
+	</nav>
+</div>
+
+		<!--main-->
+		<main> 
+		<div class="page-container">
+		<!-- content srart -->
+<div class="am-g am-g-fixed blog-fixed blog-content">
+	<div class="am-u-md-8 am-u-sm-12">
+
+		<article class="am-article blog-article-p">
+
+			<div class="am-article-hd">
+				
+
+
+				<h1 class="am-article-title blog-text-center">
+					
+					
+	
+		<a href="/2019/07/11/lambda-in-java/" itemprop="url">		
+			一个lambda的表达式是如何在java中执行的		
+		</a>
+	
+
+				</h1>
+
+				<p class="am-article-meta blog-text-center">
+					<span>
+						<i class="fa fa-clock-o"></i> 
+						<a href="/2019/07/11/lambda-in-java/" itemprop="url">
+	<time datetime="2019-07-10T16:34:58.000Z" itemprop="datePublished">
+  		2019-07-11
+  </time>
+</a>    
+&nbsp;
+					</span>
+					
+					<span>						
+						
+							<i class="fa fa-tags"></i>
+							
+								<a href="#Java" title="Java" rel="6">Java</a>&nbsp;
+							
+								<a href="#lambda" title="lambda" rel="1">lambda</a>&nbsp;
+							
+								<a href="#学习笔记" title="学习笔记" rel="1">学习笔记</a>&nbsp;
+													 											
+						
+					</span>
+				</p>
+			</div>
+
+			<div class="am-article-bd">
+				<div class="content" id="post-content">
+					
+						<p>实习的过程中，发现项目中大量的使用了Lambda的写法来提高开发效率。一直很好奇它底层到底是如何实现的？为什么可以把一个函数当做一个参数来进行传递和执行？ </p>
+<a id="more"></a>
+<h2 id="1-一个lambda函数是如何被执行的："><a href="#1-一个lambda函数是如何被执行的：" class="headerlink" title="1.一个lambda函数是如何被执行的："></a>1.一个lambda函数是如何被执行的：</h2><h3 id="1-1一个简单的demo源代码如下："><a href="#1-1一个简单的demo源代码如下：" class="headerlink" title="1.1一个简单的demo源代码如下："></a>1.1一个简单的demo源代码如下：</h3><p>这是一段简单的测试代码，包含了一个<code>lambda</code>函数，其中<code>HelloWorldLambda</code>是我定义的一个函数式接口,在这个接口的里面只包含一个抽象方法方法<code>hello</code>。</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Main</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+         HelloWorldLambda helloWorldLambda <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"hello menduo"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+         helloWorldLambda<span class="token punctuation">.</span><span class="token function">hello</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="1-2编译阶段：三个需要注意的点"><a href="#1-2编译阶段：三个需要注意的点" class="headerlink" title="1.2编译阶段：三个需要注意的点"></a>1.2编译阶段：三个需要注意的点</h3><ol>
+<li><code>lambda</code>表达式被编译生成了静态内部方法<code>lambda$main$0</code><br><img src="http://pic.menduo.xyz/20190711003954.png" alt="1"></li>
+<li>调用<code>lambda</code>处，生成<code>lambda</code>的字节码执行指令 : <code>invokedynamic #2,0 // InvokeDynamic #0:hello:()LHelloWorldLambda;</code>。<br><img src="http://pic.menduo.xyz/20190711004404.png" alt="2"></li>
+<li>这里的<code>#0</code>指的是编译生成的<code>Boostrap Method</code>：后面的是需要用到的参数，也就是实现<code>lambda</code>的接口对应的方法<br><img src="http://pic.menduo.xyz/20190711004421.png" alt="3"></li>
+</ol>
+<h3 id="1-3执行阶段："><a href="#1-3执行阶段：" class="headerlink" title="1.3执行阶段："></a>1.3执行阶段：</h3><ol>
+<li><p><code>invokedynamic #2</code> ==&gt; 执行<code>BoostrapMethods</code> 的 <code>0</code>。⬆️上图</p>
+</li>
+<li><p>可以看到,他是一个 <code>invokestatic指令</code>。执行了一个静态方法<code>LambdaMetafactory.metafactory(...)</code></p>
+</li>
+<li><p><code>LambdaMetafactory.metafactory(...)</code>  会执行<code>buildCallSite()</code> 返回一个<code>CallSite</code>，<code>CallSite</code>是一个方法句柄。<br><img src="http://pic.menduo.xyz/20190711004538.png" alt="1.3.3"></p>
+</li>
+<li><p><code>buildCallSite()</code> 主要做的事情就是，1.用asm生成一个实现lambda函数接口的代理类;2.然后返回一个方法句柄，就是lambda生成的静态方法的代理方法的句柄。</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+CallSite <span class="token function">buildCallSite</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> LambdaConversionException <span class="token punctuation">{</span>
+ <span class="token keyword">final</span> Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> innerClass <span class="token operator">=</span> <span class="token function">spinInnerClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//1</span>
+ <span class="token keyword">if</span> <span class="token punctuation">(</span>invokedType<span class="token punctuation">.</span><span class="token function">parameterCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+     <span class="token keyword">final</span> Constructor<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> ctrs <span class="token operator">=</span> <span class="token comment" spellcheck="true">//...略</span>
+     <span class="token keyword">try</span> <span class="token punctuation">{</span>
+         Object inst <span class="token operator">=</span> ctrs<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+         <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ConstantCallSite</span><span class="token punctuation">(</span>MethodHandles<span class="token punctuation">.</span><span class="token function">constant</span><span class="token punctuation">(</span>samBase<span class="token punctuation">,</span> inst<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//2</span>
+     <span class="token punctuation">}</span>
+ <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+     <span class="token keyword">try</span> <span class="token punctuation">{</span>
+         UNSAFE<span class="token punctuation">.</span><span class="token function">ensureClassInitialized</span><span class="token punctuation">(</span>innerClass<span class="token punctuation">)</span><span class="token punctuation">;</span>
+         <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ConstantCallSite</span><span class="token punctuation">(</span>
+                 MethodHandles<span class="token punctuation">.</span>Lookup<span class="token punctuation">.</span>IMPL_LOOKUP
+                         <span class="token punctuation">.</span><span class="token function">findStatic</span><span class="token punctuation">(</span>innerClass<span class="token punctuation">,</span> NAME_FACTORY<span class="token punctuation">,</span> invokedType<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//2</span>
+     <span class="token punctuation">}</span>
+ <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最终 invokeinterface 查找调用点的方法表，执行下面代理方法。<br><img src="http://pic.menduo.xyz/20190711004742.png" alt></p>
+</li>
+</ol>
+<h2 id="2-相关的知识点"><a href="#2-相关的知识点" class="headerlink" title="2.相关的知识点"></a>2.相关的知识点</h2><h3 id="2-1-方法句柄：MethodHandle"><a href="#2-1-方法句柄：MethodHandle" class="headerlink" title="2.1 方法句柄：MethodHandle"></a>2.1 方法句柄：MethodHandle</h3><h4 id="2-1-1-MethodHandle作用"><a href="#2-1-1-MethodHandle作用" class="headerlink" title="2.1.1 MethodHandle作用"></a>2.1.1 MethodHandle作用</h4><p>MethodHandle是一种拿到方法,并执行的手段，类似于反射机制拿到方法。</p>
+<h4 id="2-1-2-MethodHandle和反射拿到方法之间的不同"><a href="#2-1-2-MethodHandle和反射拿到方法之间的不同" class="headerlink" title="2.1.2 MethodHandle和反射拿到方法之间的不同"></a>2.1.2 MethodHandle和反射拿到方法之间的不同</h4><ol>
+<li><p>性能上考虑：<code>MethodHandle</code>比反射更迅速，访问检查是在创建时而不是在执行时进行的。（而且从下面的例子中看到，它操作的是字节码<code>findStatic</code>，而反射拿到方法的是在<code>java代码层</code>面上)</p>
+</li>
+<li><p>灵活性考虑：反射要更加的灵活。<code>MethodHandle</code>没有列举类中成员，获取属性访问标志之类的机制。（就只有<code>findXXX</code></p>
+</li>
+</ol>
+<h4 id="2-1-3-MethodHandle使用"><a href="#2-1-3-MethodHandle使用" class="headerlink" title="2.1.3 MethodHandle使用"></a>2.1.3 MethodHandle使用</h4><ol>
+<li>方法在哪里。methodHandle.Lookup指定的类</li>
+<li>方法名是什么。第二个参数</li>
+<li>方法的参数签名和返回类型。 MethodType</li>
+</ol>
+<p>一个<code>methodhandle</code>的小例子: MethodType 的第一个参数是返回类型，后面的是方法签名参数上的类型</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MethodHandleMain</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        MethodHandles<span class="token punctuation">.</span>Lookup  lookup <span class="token operator">=</span> MethodHandles<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        MethodType methodType <span class="token operator">=</span> MethodType<span class="token punctuation">.</span><span class="token function">methodType</span><span class="token punctuation">(</span>Integer<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span>Integer<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span>Integer<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            MethodHandle methodHandle <span class="token operator">=</span> lookup<span class="token punctuation">.</span><span class="token function">findStatic</span><span class="token punctuation">(</span>MethodHandleMain<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span><span class="token string">"sum"</span><span class="token punctuation">,</span>methodType<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            Integer x <span class="token operator">=</span> <span class="token punctuation">(</span>Integer<span class="token punctuation">)</span> methodHandle<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> Integer <span class="token function">sum</span><span class="token punctuation">(</span>Integer a<span class="token punctuation">,</span> Integer b<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="2-2-字节码生成：ASM"><a href="#2-2-字节码生成：ASM" class="headerlink" title="2.2 字节码生成：ASM"></a>2.2 字节码生成：ASM</h3><h4 id="2-2-1-ASM框架："><a href="#2-2-1-ASM框架：" class="headerlink" title="2.2.1 ASM框架："></a>2.2.1 ASM框架：</h4><p>ASM是一个字节码操作的框架。可以动态的生成和修改字节码文件</p>
+<h4 id="2-2-2-用途："><a href="#2-2-2-用途：" class="headerlink" title="2.2.2 用途："></a>2.2.2 用途：</h4><ol>
+<li>lambda表达式的解析。（这里用到了</li>
+<li>cglib动态代理类的生成。</li>
+<li>jacoco插桩也会用到。</li>
+</ol>
+<h4 id="2-3-虚拟机指令：invokedynamic-invokeinterface-invokestatic…"><a href="#2-3-虚拟机指令：invokedynamic-invokeinterface-invokestatic…" class="headerlink" title="2.3 虚拟机指令：invokedynamic, invokeinterface,invokestatic…"></a>2.3 虚拟机指令：invokedynamic, invokeinterface,invokestatic…</h4><table>
+<thead>
+<tr>
+<th>指令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>invokeinterface</td>
+<td>用以调用接口方法，在运行时搜索一个实现了这个接口方法的对象，找出适合的方法进行调用。（Invoke interface method）</td>
+</tr>
+<tr>
+<td>invokevirtual</td>
+<td>指令用于调用对象的实例方法，根据对象的实际类型进行分派（Invoke instance method; dispatch based on class）</td>
+</tr>
+<tr>
+<td>invokestatic</td>
+<td>用以调用类方法（Invoke a class (static) method ）</td>
+</tr>
+<tr>
+<td>invokespecial</td>
+<td>指令用于调用一些需要特殊处理的实例方法，包括实例初始化方法、私有方法和父类方法。（Invoke instance method; special handling for superclass, private, and instance initialization method invocations ）</td>
+</tr>
+<tr>
+<td>invokedynamic</td>
+<td>JDK1.7新加入的一个虚拟机指令，相比于之前的四条指令，他们的分派逻辑都是固化在JVM内部，而invokedynamic则用于处理新的方法分派：它允许应用级别的代码来确定执行哪一个方法调用，只有在调用要执行的时候，才会进行这种判断,从而达到动态语言的支持。(Invoke dynamic method)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-附录：打印完整的字节码文件-javap-p-v-LambdaMain2-class"><a href="#4-附录：打印完整的字节码文件-javap-p-v-LambdaMain2-class" class="headerlink" title="4.附录：打印完整的字节码文件 javap -p -v LambdaMain2.class"></a>4.附录：打印完整的字节码文件 javap -p -v LambdaMain2.class</h2><pre class="line-numbers language-java"><code class="language-java">Classfile <span class="token operator">/</span>Users<span class="token operator">/</span>menduo<span class="token operator">/</span>IdeaProjects<span class="token operator">/</span>menduodemo<span class="token operator">/</span>target<span class="token operator">/</span>classes<span class="token operator">/</span>LambdaMain2<span class="token punctuation">.</span><span class="token keyword">class</span>
+  <span class="token class-name">Last</span> modified <span class="token number">2019</span><span class="token operator">-</span><span class="token number">7</span><span class="token operator">-</span><span class="token number">9</span><span class="token punctuation">;</span> size <span class="token number">1179</span> bytes
+  MD5 checksum 7597c1d01af4829107e2659b508fbc77
+  Compiled from <span class="token string">"LambdaMain2.java"</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">LambdaMain2</span>
+  minor version<span class="token operator">:</span> <span class="token number">0</span>
+  major version<span class="token operator">:</span> <span class="token number">52</span>
+  flags<span class="token operator">:</span> ACC_PUBLIC<span class="token punctuation">,</span> ACC_SUPER
+Constant pool<span class="token operator">:</span>
+   #<span class="token number">1</span> <span class="token operator">=</span> Methodref          #<span class="token number">8</span><span class="token punctuation">.</span>#<span class="token number">25</span>         <span class="token comment" spellcheck="true">// java/lang/Object."&lt;init>":()V</span>
+   #<span class="token number">2</span> <span class="token operator">=</span> InvokeDynamic      #<span class="token number">0</span><span class="token operator">:</span>#<span class="token number">30</span>         <span class="token comment" spellcheck="true">// #0:hello:()LHelloWorldLambda;</span>
+   #<span class="token number">3</span> <span class="token operator">=</span> InterfaceMethodref #<span class="token number">31</span><span class="token punctuation">.</span>#<span class="token number">32</span>        <span class="token comment" spellcheck="true">// HelloWorldLambda.hello:()V</span>
+   #<span class="token number">4</span> <span class="token operator">=</span> Fieldref           #<span class="token number">33</span><span class="token punctuation">.</span>#<span class="token number">34</span>        <span class="token comment" spellcheck="true">// java/lang/System.out:Ljava/io/PrintStream;</span>
+   #<span class="token number">5</span> <span class="token operator">=</span> String             #<span class="token number">35</span>            <span class="token comment" spellcheck="true">// hello menduo</span>
+   #<span class="token number">6</span> <span class="token operator">=</span> Methodref          #<span class="token number">36</span><span class="token punctuation">.</span>#<span class="token number">37</span>        <span class="token comment" spellcheck="true">// java/io/PrintStream.println:(Ljava/lang/String;)V</span>
+   #<span class="token number">7</span> <span class="token operator">=</span> Class              #<span class="token number">38</span>            <span class="token comment" spellcheck="true">// LambdaMain2</span>
+   #<span class="token number">8</span> <span class="token operator">=</span> Class              #<span class="token number">39</span>            <span class="token comment" spellcheck="true">// java/lang/Object</span>
+   #<span class="token number">9</span> <span class="token operator">=</span> Utf8               <span class="token operator">&lt;</span>init<span class="token operator">></span>
+  #<span class="token number">10</span> <span class="token operator">=</span> <span class="token function">Utf8</span>               <span class="token punctuation">(</span><span class="token punctuation">)</span>V
+  #<span class="token number">11</span> <span class="token operator">=</span> Utf8               Code
+  #<span class="token number">12</span> <span class="token operator">=</span> Utf8               LineNumberTable
+  #<span class="token number">13</span> <span class="token operator">=</span> Utf8               LocalVariableTable
+  #<span class="token number">14</span> <span class="token operator">=</span> Utf8               <span class="token keyword">this</span>
+  #<span class="token number">15</span> <span class="token operator">=</span> Utf8               LLambdaMain2<span class="token punctuation">;</span>
+  #<span class="token number">16</span> <span class="token operator">=</span> Utf8               main
+  #<span class="token number">17</span> <span class="token operator">=</span> <span class="token function">Utf8</span>               <span class="token punctuation">(</span><span class="token punctuation">[</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span><span class="token punctuation">)</span>V
+  #<span class="token number">18</span> <span class="token operator">=</span> Utf8               args
+  #<span class="token number">19</span> <span class="token operator">=</span> Utf8               <span class="token punctuation">[</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span>
+  #<span class="token number">20</span> <span class="token operator">=</span> Utf8               helloWorldLambda
+  #<span class="token number">21</span> <span class="token operator">=</span> Utf8               LHelloWorldLambda<span class="token punctuation">;</span>
+  #<span class="token number">22</span> <span class="token operator">=</span> Utf8               lambda$main$<span class="token number">0</span>
+  #<span class="token number">23</span> <span class="token operator">=</span> Utf8               SourceFile
+  #<span class="token number">24</span> <span class="token operator">=</span> Utf8               LambdaMain2<span class="token punctuation">.</span>java
+  #<span class="token number">25</span> <span class="token operator">=</span> NameAndType        #<span class="token number">9</span><span class="token operator">:</span>#<span class="token number">10</span>         <span class="token comment" spellcheck="true">// "&lt;init>":()V</span>
+  #<span class="token number">26</span> <span class="token operator">=</span> Utf8               BootstrapMethods
+  #<span class="token number">27</span> <span class="token operator">=</span> MethodHandle       #<span class="token number">6</span><span class="token operator">:</span>#<span class="token number">40</span>         <span class="token comment" spellcheck="true">// invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span>
+  #<span class="token number">28</span> <span class="token operator">=</span> MethodType         #<span class="token number">10</span>            <span class="token comment" spellcheck="true">//  ()V</span>
+  #<span class="token number">29</span> <span class="token operator">=</span> MethodHandle       #<span class="token number">6</span><span class="token operator">:</span>#<span class="token number">41</span>         <span class="token comment" spellcheck="true">// invokestatic LambdaMain2.lambda$main$0:()V</span>
+  #<span class="token number">30</span> <span class="token operator">=</span> NameAndType        #<span class="token number">42</span><span class="token operator">:</span>#<span class="token number">43</span>        <span class="token comment" spellcheck="true">// hello:()LHelloWorldLambda;</span>
+  #<span class="token number">31</span> <span class="token operator">=</span> Class              #<span class="token number">44</span>            <span class="token comment" spellcheck="true">// HelloWorldLambda</span>
+  #<span class="token number">32</span> <span class="token operator">=</span> NameAndType        #<span class="token number">42</span><span class="token operator">:</span>#<span class="token number">10</span>        <span class="token comment" spellcheck="true">// hello:()V</span>
+  #<span class="token number">33</span> <span class="token operator">=</span> Class              #<span class="token number">45</span>            <span class="token comment" spellcheck="true">// java/lang/System</span>
+  #<span class="token number">34</span> <span class="token operator">=</span> NameAndType        #<span class="token number">46</span><span class="token operator">:</span>#<span class="token number">47</span>        <span class="token comment" spellcheck="true">// out:Ljava/io/PrintStream;</span>
+  #<span class="token number">35</span> <span class="token operator">=</span> Utf8               hello menduo
+  #<span class="token number">36</span> <span class="token operator">=</span> Class              #<span class="token number">48</span>            <span class="token comment" spellcheck="true">// java/io/PrintStream</span>
+  #<span class="token number">37</span> <span class="token operator">=</span> NameAndType        #<span class="token number">49</span><span class="token operator">:</span>#<span class="token number">50</span>        <span class="token comment" spellcheck="true">// println:(Ljava/lang/String;)V</span>
+  #<span class="token number">38</span> <span class="token operator">=</span> Utf8               LambdaMain2
+  #<span class="token number">39</span> <span class="token operator">=</span> Utf8               java<span class="token operator">/</span>lang<span class="token operator">/</span>Object
+  #<span class="token number">40</span> <span class="token operator">=</span> Methodref          #<span class="token number">51</span><span class="token punctuation">.</span>#<span class="token number">52</span>        <span class="token comment" spellcheck="true">// java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span>
+  #<span class="token number">41</span> <span class="token operator">=</span> Methodref          #<span class="token number">7</span><span class="token punctuation">.</span>#<span class="token number">53</span>         <span class="token comment" spellcheck="true">// LambdaMain2.lambda$main$0:()V</span>
+  #<span class="token number">42</span> <span class="token operator">=</span> Utf8               hello
+  #<span class="token number">43</span> <span class="token operator">=</span> <span class="token function">Utf8</span>               <span class="token punctuation">(</span><span class="token punctuation">)</span>LHelloWorldLambda<span class="token punctuation">;</span>
+  #<span class="token number">44</span> <span class="token operator">=</span> Utf8               HelloWorldLambda
+  #<span class="token number">45</span> <span class="token operator">=</span> Utf8               java<span class="token operator">/</span>lang<span class="token operator">/</span>System
+  #<span class="token number">46</span> <span class="token operator">=</span> Utf8               out
+  #<span class="token number">47</span> <span class="token operator">=</span> Utf8               Ljava<span class="token operator">/</span>io<span class="token operator">/</span>PrintStream<span class="token punctuation">;</span>
+  #<span class="token number">48</span> <span class="token operator">=</span> Utf8               java<span class="token operator">/</span>io<span class="token operator">/</span>PrintStream
+  #<span class="token number">49</span> <span class="token operator">=</span> Utf8               println
+  #<span class="token number">50</span> <span class="token operator">=</span> <span class="token function">Utf8</span>               <span class="token punctuation">(</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span><span class="token punctuation">)</span>V
+  #<span class="token number">51</span> <span class="token operator">=</span> Class              #<span class="token number">54</span>            <span class="token comment" spellcheck="true">// java/lang/invoke/LambdaMetafactory</span>
+  #<span class="token number">52</span> <span class="token operator">=</span> NameAndType        #<span class="token number">55</span><span class="token operator">:</span>#<span class="token number">59</span>        <span class="token comment" spellcheck="true">// metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span>
+  #<span class="token number">53</span> <span class="token operator">=</span> NameAndType        #<span class="token number">22</span><span class="token operator">:</span>#<span class="token number">10</span>        <span class="token comment" spellcheck="true">// lambda$main$0:()V</span>
+  #<span class="token number">54</span> <span class="token operator">=</span> Utf8               java<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>LambdaMetafactory
+  #<span class="token number">55</span> <span class="token operator">=</span> Utf8               metafactory
+  #<span class="token number">56</span> <span class="token operator">=</span> Class              #<span class="token number">61</span>            <span class="token comment" spellcheck="true">// java/lang/invoke/MethodHandles$Lookup</span>
+  #<span class="token number">57</span> <span class="token operator">=</span> Utf8               Lookup
+  #<span class="token number">58</span> <span class="token operator">=</span> Utf8               InnerClasses
+  #<span class="token number">59</span> <span class="token operator">=</span> <span class="token function">Utf8</span>               <span class="token punctuation">(</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodHandles$Lookup<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodType<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodType<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodHandle<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodType<span class="token punctuation">;</span><span class="token punctuation">)</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>CallSite<span class="token punctuation">;</span>
+  #<span class="token number">60</span> <span class="token operator">=</span> Class              #<span class="token number">62</span>            <span class="token comment" spellcheck="true">// java/lang/invoke/MethodHandles</span>
+  #<span class="token number">61</span> <span class="token operator">=</span> Utf8               java<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodHandles$Lookup
+  #<span class="token number">62</span> <span class="token operator">=</span> Utf8               java<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodHandles
+<span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token function">LambdaMain2</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    descriptor<span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span>V
+    flags<span class="token operator">:</span> ACC_PUBLIC
+    Code<span class="token operator">:</span>
+      stack<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> locals<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> args_size<span class="token operator">=</span><span class="token number">1</span>
+         <span class="token number">0</span><span class="token operator">:</span> aload_0
+         <span class="token number">1</span><span class="token operator">:</span> invokespecial #<span class="token number">1</span>                  <span class="token comment" spellcheck="true">// Method java/lang/Object."&lt;init>":()V</span>
+         <span class="token number">4</span><span class="token operator">:</span> <span class="token keyword">return</span>
+      LineNumberTable<span class="token operator">:</span>
+        line <span class="token number">1</span><span class="token operator">:</span> <span class="token number">0</span>
+      LocalVariableTable<span class="token operator">:</span>
+        Start  Length  Slot  Name   Signature
+            <span class="token number">0</span>       <span class="token number">5</span>     <span class="token number">0</span>  <span class="token keyword">this</span>   LLambdaMain2<span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    descriptor<span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">[</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span><span class="token punctuation">)</span>V
+    flags<span class="token operator">:</span> ACC_PUBLIC<span class="token punctuation">,</span> ACC_STATIC
+    Code<span class="token operator">:</span>
+      stack<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> locals<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">,</span> args_size<span class="token operator">=</span><span class="token number">1</span>
+         <span class="token number">0</span><span class="token operator">:</span> invokedynamic #<span class="token number">2</span><span class="token punctuation">,</span>  <span class="token number">0</span>              <span class="token comment" spellcheck="true">// InvokeDynamic #0:hello:()LHelloWorldLambda;</span>
+         <span class="token number">5</span><span class="token operator">:</span> astore_1
+         <span class="token number">6</span><span class="token operator">:</span> aload_1
+         <span class="token number">7</span><span class="token operator">:</span> invokeinterface #<span class="token number">3</span><span class="token punctuation">,</span>  <span class="token number">1</span>            <span class="token comment" spellcheck="true">// InterfaceMethod HelloWorldLambda.hello:()V</span>
+        <span class="token number">12</span><span class="token operator">:</span> <span class="token keyword">return</span>
+      LineNumberTable<span class="token operator">:</span>
+        line <span class="token number">3</span><span class="token operator">:</span> <span class="token number">0</span>
+        line <span class="token number">4</span><span class="token operator">:</span> <span class="token number">6</span>
+        line <span class="token number">5</span><span class="token operator">:</span> <span class="token number">12</span>
+      LocalVariableTable<span class="token operator">:</span>
+        Start  Length  Slot  Name   Signature
+            <span class="token number">0</span>      <span class="token number">13</span>     <span class="token number">0</span>  args   <span class="token punctuation">[</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span>
+            <span class="token number">6</span>       <span class="token number">7</span>     <span class="token number">1</span> helloWorldLambda   LHelloWorldLambda<span class="token punctuation">;</span>
+
+  <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">void</span> lambda$main$<span class="token function">0</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    descriptor<span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span>V
+    flags<span class="token operator">:</span> ACC_PRIVATE<span class="token punctuation">,</span> ACC_STATIC<span class="token punctuation">,</span> ACC_SYNTHETIC
+    Code<span class="token operator">:</span>
+      stack<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">,</span> locals<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span> args_size<span class="token operator">=</span><span class="token number">0</span>
+         <span class="token number">0</span><span class="token operator">:</span> getstatic     #<span class="token number">4</span>                  <span class="token comment" spellcheck="true">// Field java/lang/System.out:Ljava/io/PrintStream;</span>
+         <span class="token number">3</span><span class="token operator">:</span> ldc           #<span class="token number">5</span>                  <span class="token comment" spellcheck="true">// String hello menduo</span>
+         <span class="token number">5</span><span class="token operator">:</span> invokevirtual #<span class="token number">6</span>                  <span class="token comment" spellcheck="true">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span>
+         <span class="token number">8</span><span class="token operator">:</span> <span class="token keyword">return</span>
+      LineNumberTable<span class="token operator">:</span>
+        line <span class="token number">3</span><span class="token operator">:</span> <span class="token number">0</span>
+<span class="token punctuation">}</span>
+SourceFile<span class="token operator">:</span> <span class="token string">"LambdaMain2.java"</span>
+InnerClasses<span class="token operator">:</span>
+     <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> #<span class="token number">57</span><span class="token operator">=</span> #<span class="token number">56</span> of #<span class="token number">60</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles</span>
+BootstrapMethods<span class="token operator">:</span>
+  <span class="token number">0</span><span class="token operator">:</span> #<span class="token number">27</span> invokestatic java<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>LambdaMetafactory<span class="token punctuation">.</span>metafactory<span class="token operator">:</span><span class="token punctuation">(</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodHandles$Lookup<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>String<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodType<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodType<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodHandle<span class="token punctuation">;</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>MethodType<span class="token punctuation">;</span><span class="token punctuation">)</span>Ljava<span class="token operator">/</span>lang<span class="token operator">/</span>invoke<span class="token operator">/</span>CallSite<span class="token punctuation">;</span>
+    Method arguments<span class="token operator">:</span>
+      #<span class="token function">28</span> <span class="token punctuation">(</span><span class="token punctuation">)</span>V
+      #<span class="token number">29</span> invokestatic LambdaMain2<span class="token punctuation">.</span>lambda$main$<span class="token number">0</span><span class="token operator">:</span><span class="token punctuation">(</span><span class="token punctuation">)</span>V
+      #<span class="token function">28</span> <span class="token punctuation">(</span><span class="token punctuation">)</span>V
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="5-参考"><a href="#5-参考" class="headerlink" title="5.参考"></a>5.参考</h2><p><a href="https://www.infoq.cn/article/Invokedynamic-Javas-secret-weapon" target="_blank" rel="noopener">https://www.infoq.cn/article/Invokedynamic-Javas-secret-weapon</a></p>
+<p><a href="https://blog.csdn.net/zxhoo/article/details/38387141" target="_blank" rel="noopener">https://blog.csdn.net/zxhoo/article/details/38387141</a></p>
+<p><a href="https://blog.csdn.net/kangkanglou/article/details/79422520" target="_blank" rel="noopener">https://blog.csdn.net/kangkanglou/article/details/79422520</a></p>
+<p><a href="https://www.jianshu.com/p/3ae6efff1c96" target="_blank" rel="noopener">https://www.jianshu.com/p/3ae6efff1c96</a> 静态分派和动态分派</p>
+
+					
+				</div>
+			</div>
+		</article>
+
+		<ul class="am-pagination">
+    
+	
+		<li class="am-pagination-next">
+		<a class="pull-right" href="/2019/07/04/fastjson-update-sdk-bug/" title="fastjson升级版本引发bug的思考">
+			下一篇 &raquo;
+		</a>
+		</li>
+	 
+ </ul>
+        
+
+		<div class="theme-annie-comment-button-container">
+	<button id="annie-comment-button" class="theme-annie-comment-button" onclick="Annie_Comment()">
+		加载评论
+		<!--加载评论-->
+	</button>
+</div>
+
+<div id="annie-comment-container" class="theme-annie-comment-main-container">
+
+	
+		
+			<!-- comment gitalk -->
+			<!-- show gitalk comment -->
+
+  <div id="gitalk-container"></div>
+
+
+<!-- gitalk`s css & js -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<link rel="stylesheet" href="/css/comment.css">
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<script type="text/javascript">
+	//thanks O-R
+	//https://github.com/gitalk/gitalk/issues/102#issuecomment-382970552
+	//去除尾部匹配正则数组的字符串  
+	//remove redundant characters
+	String.prototype.trimEnd = function(regStr) {
+		var result = this;
+		if(regStr == undefined || regStr == null || regStr == "") {
+			return result;
+		}
+		var array = regStr.split(',');
+
+		if(array.length > 0) {
+
+			var c = array.shift();
+			var str = this;
+			var i = str.length;
+			var rg = new RegExp(c);
+			var matchArr = str.match(rg);
+
+			if(matchArr != undefined && matchArr != null && matchArr.length > 0) {
+				var matchStr = matchArr[0].replace(/\\/g, "\\\\").replace(/\*/g, "\\*")
+					.replace(/\+/g, "\\+").replace(/\|/g, "\\|")
+					.replace(/\{/g, "\\{").replace(/\}/g, "\\}")
+					.replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+					.replace(/\^/g, "\\^").replace(/\$/g, "\\$")
+					.replace(/\[/g, "\\[").replace(/\]/g, "\\]")
+					.replace(/\?/g, "\\?").replace(/\,/g, "\\,")
+					.replace(/\./g, "\\.").replace(/\&/g, "\\&");
+				matchStr = matchStr + '$';
+				result = str.replace(new RegExp(matchStr), "");
+			}
+
+			if(array.length > 0) {
+				return result.trimEnd(array.join())
+			} else {
+				return result;
+			}
+		}
+	};
+
+	//create gitalk
+	var gitalk = new Gitalk({
+		clientID: '097e5f5792a7f81b5f45',
+		clientSecret: 'e4cc1f53472fcf3893c281eac6e17c19ca1eb490',
+		//id: window.location.pathname,
+		// id: (window.location.pathname).split("/").pop().substring(0, 49),
+		id: md5(location.href.trimEnd('#.*$,\\?.*$,index.html$')),
+		repo: 'comments',
+		owner: 'DmuMenDuo',
+		admin: 'DmuMenDuo',
+		distractionFreeMode: 'true',
+	})
+	gitalk.render('gitalk-container');
+</script>
+		
+	
+
+</div>
+
+<script type="text/javascript">
+	/* Show Comment */
+	var Annie_Comment = function() {
+		function Show_Hidden(obj) {
+			obj.style.display = 'block';
+		}
+		
+		//var obutton = $('#annie-comment-button');
+		//var obutton = $('#annie-comment-container');
+		var obutton = document.getElementById("annie-comment-button" || "0");
+		var odiv = document.getElementById("annie-comment-container");
+		if( 'obutton' ) {
+			obutton.onclick = function() {
+				Show_Hidden(odiv);
+				$("#annie-comment-button").css("display", 'none');
+				return false;
+			}
+		}
+	};
+
+	(function Annie_Init() {
+		Annie_Comment();
+	})();
+</script>
+		
+		<!--
+	时间：2018-09-24
+	描述：The TOC module refers to 'https://github.com/codefine/hexo-theme-mellow', include toc.ejs、toc.js、toc.css. All rights reserved by codefine. 
+-->
+
+	
+		<aside class="post-widget">
+			<nav class="post-toc-wrap" id="post-toc">
+				
+					<strong>文章目录</strong>
+				
+				
+				<!--toc(post.content)-->
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-一个lambda函数是如何被执行的："><span class="post-toc-text">1.一个lambda函数是如何被执行的：</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-1一个简单的demo源代码如下："><span class="post-toc-text">1.1一个简单的demo源代码如下：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-2编译阶段：三个需要注意的点"><span class="post-toc-text">1.2编译阶段：三个需要注意的点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-3执行阶段："><span class="post-toc-text">1.3执行阶段：</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#2-相关的知识点"><span class="post-toc-text">2.相关的知识点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-1-方法句柄：MethodHandle"><span class="post-toc-text">2.1 方法句柄：MethodHandle</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-1-MethodHandle作用"><span class="post-toc-text">2.1.1 MethodHandle作用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-2-MethodHandle和反射拿到方法之间的不同"><span class="post-toc-text">2.1.2 MethodHandle和反射拿到方法之间的不同</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-3-MethodHandle使用"><span class="post-toc-text">2.1.3 MethodHandle使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-2-字节码生成：ASM"><span class="post-toc-text">2.2 字节码生成：ASM</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-2-1-ASM框架："><span class="post-toc-text">2.2.1 ASM框架：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-2-2-用途："><span class="post-toc-text">2.2.2 用途：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-3-虚拟机指令：invokedynamic-invokeinterface-invokestatic…"><span class="post-toc-text">2.3 虚拟机指令：invokedynamic, invokeinterface,invokestatic…</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#4-附录：打印完整的字节码文件-javap-p-v-LambdaMain2-class"><span class="post-toc-text">4.附录：打印完整的字节码文件 javap -p -v LambdaMain2.class</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#5-参考"><span class="post-toc-text">5.参考</span></a></li></ol>
+			</nav>
+			<div class="post-toc-bar"><div>
+		</div></div></aside>
+	
+
+	</div>
+</div>
+		</div>
+		</main>
+		
+		<!--footer-->
+		<footer>
+	<div class="blog-text-center">
+		<div class="theme-annie-social">
+				
+				
+					<a href="https://github.com/DmuMenDuo" title="Github" target="_blank"><i class="fa fa-github"></i>&nbsp;</a>
+					
+				
+				
+					<a href="mailto:menduo@smail.nju.edu.cn" title="Email" target="_blank"><i class="fa fa-envelope-o"></i>&nbsp;</a>
+					
+					
+						
+				
+		</div>
+	</div>
+
+	<div class="blog-text-center">
+		<div class="theme-annie-copyright">
+			
+				&copy; 2017 - 2019, content by men duo. All Rights Reserved.			       	
+			
+		</div>
+	</div>
+
+	<div class="blog-text-center">
+		<div class="theme-annie-copyright">
+		<a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> Theme <a href="https://github.com/Sariay/hexo-theme-Annie" title="Annie" target="_blank" rel="noopener">Annie</a> by Sariay.		
+		</div>
+		
+	</div>
+
+	<div class="blog-text-center">
+		<div class="theme-annie-copyright">	 	
+			<a target="_blank" href="http://beian.miit.gov.cn" style="text-decoration:none;display:inline-block;text-decoration:none;height:20px;line-height:20px;">
+				<span style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">津ICP备16003273号-2 |
+				</span>
+			</a>
+			<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=12011402000486" style="text-decoration:none;display:inline-block;text-decoration:none;height:20px;line-height:20px;">
+				<span style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">津公网安备 12011402000486号</span>
+			</a>
+		</div>
+		
+	</div>
+</footer>
+		<!-- <script src="http://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script> -->
+
+<!-- <script>
+	window.jQuery || document.write('<script src="/js/jquery-2.1.1.min.js"><\/script>')
+</script> -->
+<script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+<style>
+	.motto {
+		color: #ffffff;
+		font-size: 20px;
+		margin: 100px 25% 0;
+		width: 50%;
+		line-height: 1.4;
+		font-family:"KaiTi", "STXingkai", "Source Sans Pro", "Segoe UI", "Lucida Grande", Helvetica, Arial, "Microsoft YaHei", FreeSans, Arimo, "Droid Sans", "wenquanyi micro hei", "Hiragino Sans GB", "Hiragino Sans GB W3", FontAwesome, sans-serif;
+		text-align: center;
+	}
+	@media(max-width: 890px) {
+		.motto {	
+			margin: 100px 10% 0;
+			width: 80%;
+		}
+	}
+	@media(max-width: 890px) {
+		.motto {
+			margin: 100px 5% 0;
+			width: 90%;
+		}
+	}
+</style>
+<!-- 
+
+	<script src="/js/motto.js"></script>
+	<script type="text/javascript">
+		$(".motto").html(getMingYanContent());
+	</script>	
+ -->
+
+
+	<div class="popup search-popup local-search-popup">
+    <span class="popup-btn-close">
+      ESC
+    </span>
+    <div class="container">
+      <div class="col-md-8 col-md-offset-2">
+
+        <div class="local-search-header clearfix">
+            <span class="search-icon"></span>
+            <div class="local-search-input-wrapper">
+              <input autocomplete="off" placeholder="Search..." type="text" id="local-search-input">
+            </div>
+        </div>
+
+        <div id="local-search-result"></div>
+
+      </div>
+    </div>
+</div>
+
+<script src="/js/ziploader.js"></script>
+
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.json";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').fadeOut(300);
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $('.popup').fadeIn(300);
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // get search zip version
+    $.get('/searchVersion.txt?t=' + (+new Date()), function(res) {
+      if (localStorage.getItem('searchVersion') !== res) {
+        localStorage.setItem('searchVersion', res);
+        initSearchJson();
+      }
+    });
+
+    function initSearchJson () {
+      initLoad(['/search.zip'], {
+        loadOptions: {
+          success: function(obj) {
+            localStorage.setItem('searchJson', obj['search.json'])
+          },
+          error: function(e) {
+            return console.log(e)
+          }
+        },
+        returnOptions: {
+          'json': TYPE_TEXT
+        },
+        mimeOptions:{
+          'json':'application/json'
+        }
+      })
+    }
+
+    // search function;
+    var searchFunc = function(search_id, content_id) {
+      'use strict';
+
+      isfetched = true;
+      var datas = JSON.parse(localStorage.getItem('searchJson'));
+      console.log(search_id)
+      var input = document.getElementById(search_id);
+      var resultContent = document.getElementById(content_id);
+      var inputEventFunction = function() {
+        var searchText = input.value.trim().toLowerCase();
+        var keywords = searchText.split(/[\s\-]+/);
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        var resultItems = [];
+        if (searchText.length > 0) {
+          // perform local searching
+          datas.forEach(function(data) {
+            var isMatch = false;
+            var hitCount = 0;
+            var searchTextCount = 0;
+            var title = data.title ? data.title.trim() : '';
+            var titleInLowerCase = title.toLowerCase();
+            var content = data.content ? data.content.trim().replace(/<[^>]+>/g,"") : '';
+            var contentInLowerCase = content.toLowerCase();
+            var articleUrl = decodeURIComponent(data.url);
+            var indexOfTitle = [];
+            var indexOfContent = [];
+            // only match articles with not empty titles
+            keywords.forEach(function(keyword) {
+              function getIndexByWord(word, text, caseSensitive) {
+                var wordLen = word.length;
+                if (wordLen === 0) {
+                  return [];
+                }
+                var startPosition = 0, position = [], index = [];
+                if (!caseSensitive) {
+                  text = text.toLowerCase();
+                  word = word.toLowerCase();
+                }
+                while ((position = text.indexOf(word, startPosition)) > -1) {
+                  index.push({position: position, word: word});
+                  startPosition = position + wordLen;
+                }
+                return index;
+              }
+
+              indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+              indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+            });
+            if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+              isMatch = true;
+              hitCount = indexOfTitle.length + indexOfContent.length;
+            }
+
+            // show search results
+
+            if (isMatch) {
+              // sort index by position of keyword
+
+              [indexOfTitle, indexOfContent].forEach(function (index) {
+                index.sort(function (itemLeft, itemRight) {
+                  if (itemRight.position !== itemLeft.position) {
+                    return itemRight.position - itemLeft.position;
+                  } else {
+                    return itemLeft.word.length - itemRight.word.length;
+                  }
+                });
+              });
+
+              // merge hits into slices
+
+              function mergeIntoSlice(text, start, end, index) {
+                var item = index[index.length - 1];
+                var position = item.position;
+                var word = item.word;
+                var hits = [];
+                var searchTextCountInSlice = 0;
+                while (position + word.length <= end && index.length != 0) {
+                  if (word === searchText) {
+                    searchTextCountInSlice++;
+                  }
+                  hits.push({position: position, length: word.length});
+                  var wordEnd = position + word.length;
+
+                  // move to next position of hit
+
+                  index.pop();
+                  while (index.length != 0) {
+                    item = index[index.length - 1];
+                    position = item.position;
+                    word = item.word;
+                    if (wordEnd > position) {
+                      index.pop();
+                    } else {
+                      break;
+                    }
+                  }
+                }
+                searchTextCount += searchTextCountInSlice;
+                return {
+                  hits: hits,
+                  start: start,
+                  end: end,
+                  searchTextCount: searchTextCountInSlice
+                };
+              }
+
+              var slicesOfTitle = [];
+              if (indexOfTitle.length != 0) {
+                slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+              }
+
+              var slicesOfContent = [];
+              while (indexOfContent.length != 0) {
+                var item = indexOfContent[indexOfContent.length - 1];
+                var position = item.position;
+                var word = item.word;
+                // cut out 100 characters
+                var start = position - 20;
+                var end = position + 80;
+                if(start < 0){
+                  start = 0;
+                }
+                if (end < position + word.length) {
+                  end = position + word.length;
+                }
+                if(end > content.length){
+                  end = content.length;
+                }
+                slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+              }
+
+              // sort slices in content by search text's count and hits' count
+
+              slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                  return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                  return sliceRight.hits.length - sliceLeft.hits.length;
+                } else {
+                  return sliceLeft.start - sliceRight.start;
+                }
+              });
+
+              // select top N slices in content
+
+              var upperBound = parseInt('-1');
+              if (upperBound >= 0) {
+                slicesOfContent = slicesOfContent.slice(0, upperBound);
+              }
+
+              // highlight title and content
+
+              function highlightKeyword(text, slice) {
+                var result = '';
+                var prevEnd = slice.start;
+                slice.hits.forEach(function (hit) {
+                  result += text.substring(prevEnd, hit.position);
+                  var end = hit.position + hit.length;
+                  result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                  prevEnd = end;
+                });
+                result += text.substring(prevEnd, slice.end);
+                return result;
+              }
+
+              var resultItem = '';
+
+              if (slicesOfTitle.length != 0) {
+                resultItem += "<li><a target='_blank' href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+              } else {
+                resultItem += "<li><a target='_blank' href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+              }
+
+              slicesOfContent.forEach(function (slice) {
+                resultItem +=  "<p class=\"search-result\">" + highlightKeyword(content, slice) + "...</p>";
+              });
+
+              resultItem += "</li>";
+              resultItems.push({
+                item: resultItem,
+                searchTextCount: searchTextCount,
+                hitCount: hitCount,
+                id: resultItems.length
+              });
+            }
+          })
+        };
+        if (keywords.length === 1 && keywords[0] === "") {
+          resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+        } else if (resultItems.length === 0) {
+          resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /> no result </div>'
+        } else {
+          resultItems.sort(function (resultLeft, resultRight) {
+            if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+              return resultRight.searchTextCount - resultLeft.searchTextCount;
+            } else if (resultLeft.hitCount !== resultRight.hitCount) {
+              return resultRight.hitCount - resultLeft.hitCount;
+            } else {
+              return resultRight.id - resultLeft.id;
+            }
+          });
+          var searchResultList = '<ul class=\"search-result-list\">';
+          resultItems.forEach(function (result) {
+            searchResultList += result.item;
+          })
+          searchResultList += "</ul>";
+          resultContent.innerHTML = searchResultList;
+        }
+      }
+
+      if ('auto' === 'auto') {
+        input.addEventListener('input', inputEventFunction);
+      } else {
+        $('.search-icon').click(inputEventFunction);
+        input.addEventListener('keypress', function (event) {
+          if (event.keyCode === 13) {
+            inputEventFunction();
+          }
+        });
+      }
+
+      // remove loading animation
+      $('body').css('overflow', '');
+
+      proceedsearch();
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        $('.sb-close').click();
+        searchFunc('local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+	<script type="text/javascript" src="/js/love.js"></script>
+
+
+
+	<script type="text/javascript" src="/js/toc.js"></script>
+
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script type="text/javascript">
+	//generate a random img that pre_name 'from 0 to 110'
+	//var random_bg = Math.floor(Math.random() * 9 + 1);
+
+	//var bg = 'url(/img/random/' + random_bg + '.jpg)';		
+	//var bg = 'url(' + 2 + '.jpg)';
+
+	//$("#header-bg-2").css("background-image", bg);
+</script>
+		
+		<!--back to top-->
+        <style type="text/css">
+	#totop {
+		background: white;
+		border-radius: 50%;
+		position: fixed;
+		right: 5.4%;
+		bottom: 80px;
+		cursor: pointer;
+	}
+	
+	#totop a {
+		color: #474747;
+		background-color: transparent;
+		padding: 10px;
+		text-decoration: none;
+	}
+	
+	@media(max-width:512px) {
+		#totop {
+			display: none;
+			visibility: hidden;
+		}
+	}
+</style>
+
+
+	<div id="totop">
+  		<a href="javascript:;" class="fa fa-arrow-up"></a>
+	</div>
+
+	</body>
+	</html>
+

@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.8.0">
-	<title>一道笔试题的思考:基本类型和包装类型进行数据比较的问题总结</title>
+	<title>fastjson升级版本引发bug的思考</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -98,8 +98,8 @@
 					
 					
 	
-		<a href="/2019/04/21/int-with-integer/" itemprop="url">		
-			一道笔试题的思考:基本类型和包装类型进行数据比较的问题总结		
+		<a href="/2019/07/04/fastjson-update-sdk-bug/" itemprop="url">		
+			fastjson升级版本引发bug的思考		
 		</a>
 	
 
@@ -108,9 +108,9 @@
 				<p class="am-article-meta blog-text-center">
 					<span>
 						<i class="fa fa-clock-o"></i> 
-						<a href="/2019/04/21/int-with-integer/" itemprop="url">
-	<time datetime="2019-04-21T04:59:49.000Z" itemprop="datePublished">
-  		2019-04-21
+						<a href="/2019/07/04/fastjson-update-sdk-bug/" itemprop="url">
+	<time datetime="2019-07-03T17:12:17.000Z" itemprop="datePublished">
+  		2019-07-04
   </time>
 </a>    
 &nbsp;
@@ -122,7 +122,11 @@
 							
 								<a href="#Java" title="Java" rel="6">Java</a>&nbsp;
 							
-								<a href="#基础知识" title="基础知识" rel="1">基础知识</a>&nbsp;
+								<a href="#Bug解决" title="Bug解决" rel="3">Bug解决</a>&nbsp;
+							
+								<a href="#开发" title="开发" rel="4">开发</a>&nbsp;
+							
+								<a href="#fastjson" title="fastjson" rel="1">fastjson</a>&nbsp;
 													 											
 						
 					</span>
@@ -132,65 +136,88 @@
 			<div class="am-article-bd">
 				<div class="content" id="post-content">
 					
-						<p>昨天阅文的一道笔试题，让仔细解释一下 <code>int</code>和<code>Integer</code>各种不同数据比较的问题，我发现自己能说出来的东西挺少的。阿里一面面试官说我了解知识的深度不够的问题，确实让我想了很多，其实我给自己的<code>特质</code>定位应该是可以迅速发现问题并解决、可以很快的举一反三，但是很少会因为这个问题去思考到底是底层是因为什么，也就是说<code>总结反思</code>的能力太差了，说白了还是修炼不到位，平时太懒了。</p>
-<p>所以以后遇到的每个问题都要认真的记录下来。争取秋招拿offer!</p>
+						<p>因为<code>fastjson</code>低版本的安全漏洞问题，所以公司所有服务全部要进行版本升级。</p>
+<p>给公司升级<code>fastjson</code>版本时候发现了一个问题，在老版本中<code>key</code>的类型只能是<code>String</code>，而在新版本中可以为任意<code>Object</code>类型。但是在获取<code>keySet()</code>时候静态检测结果只能允许返回<code>String</code>。所以造成了运行时强转类型失败的异常。</p>
 <a id="more"></a>
-<p>对于这个问题，首先有个<strong>装箱</strong>和<strong>拆箱</strong>的概念要首先被明确。也就是基本类型和包装类型可以相互转化。</p>
-<h3 id="什么是装箱和拆箱？"><a href="#什么是装箱和拆箱？" class="headerlink" title="什么是装箱和拆箱？"></a>什么是装箱和拆箱？</h3><p>对于每一个基本类型都会有一个对应的包装类型。例如<code>int</code>的包装类型就是<code>Integer</code>。而拆箱动作就是将包装类型转化为基本类型，装箱动作就是将基本类型变成包装类型。</p>
-<h4 id="对应的API-以Integer为例："><a href="#对应的API-以Integer为例：" class="headerlink" title="对应的API,以Integer为例："></a>对应的API,以Integer为例：</h4><ul>
-<li>基本类型 –&gt; 包装类型 Integer i = Integer.valueOf(int);</li>
-</ul>
-<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> Integer <span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">>=</span> IntegerCache<span class="token punctuation">.</span>low <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;=</span> IntegerCache<span class="token punctuation">.</span>high<span class="token punctuation">)</span>
-        <span class="token keyword">return</span> IntegerCache<span class="token punctuation">.</span>cache<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token operator">-</span>IntegerCache<span class="token punctuation">.</span>low<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">;</span> 
-        <span class="token comment" spellcheck="true">//常量池缓存。[-128,127 or high] 默认127</span>
-        <span class="token comment" spellcheck="true">//其中缓存池high大小可通过参数『java.lang.Integer.IntegerCache.high』进行调整,</span>
-        <span class="token comment" spellcheck="true">//最大为Integer.MAX_VALUE - 128 - 1 </span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h3 id="问题起因"><a href="#问题起因" class="headerlink" title="问题起因"></a>问题起因</h3><p><code>JSON.parseObject()</code>的过程中老版本不会在乎你的<code>key</code>是什么类型，会直接<code>toString()</code>。而在新版本中增加了一个<code>特性开关</code>的选项：</p>
+<ol>
+<li>fastjson 1.2.29 中，在进行json解析成object的过程中，会直接把key的类型转成String.<br><img src="https://i.loli.net/2019/07/04/5d1ce2a5d356444371.png" alt="pic1"></li>
+<li>fastjson 1.2.58 中，增加了一个<code>feature: NonStringKeyAsString</code>，只有在进行<code>parse()</code>时,指定转成<code>String</code>的key才会进行转化。<br><img src="https://i.loli.net/2019/07/04/5d1ce2e6f2bb298662.png" alt="pic2"><br><img src="https://i.loli.net/2019/07/04/5d1ce39af2f9683542.png" alt="pic3"></li>
+</ol>
+<h3 id="我的问题"><a href="#我的问题" class="headerlink" title="我的问题"></a>我的问题</h3><p>下面的代码在<code>fastjson1.2.58</code>的条件下，进行编译是可以通过的但是运行就会报出 <code>java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.String</code> 这个错误。这是为什么？</p>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    JSONObject jsonObject <span class="token operator">=</span>JSON<span class="token punctuation">.</span><span class="token function">parseObject</span><span class="token punctuation">(</span><span class="token string">"{64:\"64\"}"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//keySet()声明的返回类型确实是Set&lt;String> 符合遍历条件</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>String x<span class="token operator">:</span>jsonObject<span class="token punctuation">.</span><span class="token function">keySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>包装类型 –&gt; 基本类型 int ii = i.intValue();</li>
-</ul>
-<pre class="line-numbers language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">intValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> value<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><strong>总结：装箱操作就是调用包装类型的valueOf ;拆箱操作就是调用包装类型的xxValue()</strong></p>
-<h4 id="Java可以做到自动拆箱和装箱"><a href="#Java可以做到自动拆箱和装箱" class="headerlink" title="Java可以做到自动拆箱和装箱"></a>Java可以做到自动拆箱和装箱</h4><blockquote>
-<p>在java中已经实现了自动拆箱和装箱的操作。</p>
-</blockquote>
-<blockquote>
-<p>时机：当任何一个操作中混用了基本类型和装箱类型，装箱类型就会进行拆箱操作。</p>
-</blockquote>
-<h3 id="总结几个混合使用的要点"><a href="#总结几个混合使用的要点" class="headerlink" title="总结几个混合使用的要点"></a>总结几个混合使用的要点</h3><h4 id="一些简单的测试用例进行解释整个-int和Integer进行比较的总结："><a href="#一些简单的测试用例进行解释整个-int和Integer进行比较的总结：" class="headerlink" title="一些简单的测试用例进行解释整个 int和Integer进行比较的总结："></a>一些简单的测试用例进行解释整个 int和Integer进行比较的总结：</h4><ul>
-<li>int 和 Integer进行混合比较时，Integer会进行拆箱操作变成基本类型。</li>
-<li>Integer xx  = 1 这种会调用valueOf自动装箱。</li>
-<li>Integer进行new操作的对象是放到堆上的。</li>
-<li>Integer 调用valueOf返回的对象，分两种情况：① -128 &lt;= x &lt;= 127 返回的常量池缓冲区的对象 ② x &gt; 128 会在堆上new一个新的对象 (只考虑默认的情况)</li>
-</ul>
-<h4 id="具体的几个测试用例"><a href="#具体的几个测试用例" class="headerlink" title="具体的几个测试用例"></a>具体的几个测试用例</h4><pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> a0 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> b0 <span class="token operator">=</span> <span class="token number">128</span><span class="token punctuation">;</span>
-        Integer a1 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
-        Integer b1 <span class="token operator">=</span> <span class="token number">128</span><span class="token punctuation">;</span>
-        Integer a2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Integer a3 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Integer b3 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">128</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Integer a4 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Integer b4 <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">128</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a0 <span class="token operator">==</span> a1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 首先a1返回的是常量池中的对象，又因为和int进行比较所以进行拆箱操作</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b0 <span class="token operator">==</span> b1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 同上，但是会在堆上new一个新的对象然后自动拆箱</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a1 <span class="token operator">==</span> a2<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false 首先 a1是缓存在常量池的对象，a2是在堆上new的对象</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a3 <span class="token operator">==</span> a2<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false a3返回的是放在常量池中的对象，两个对象不是同一个</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a3 <span class="token operator">==</span> a1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 返回都是常量池的中的对象，比较地址相等</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a3 <span class="token operator">==</span> a4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 返回都是常量池进行缓存过的对象，比较地址相等</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b3 <span class="token operator">==</span> b4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false 两个堆上新new对象，具体看valueOf源码，在上面</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a0 <span class="token operator">==</span> a4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 拆箱比较</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b0 <span class="token operator">==</span> b4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//true 拆箱</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>b1 <span class="token operator">==</span> b4<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//false 装箱返回new的堆上对象 和 new的堆上对象</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>编译正确也就证明这段代码躲过了<code>Java的类型检查</code>。但是在运行过程中，发生了什么导致了<strong>运行过程中得到的数据类型并不是声明的类型</strong>。</p>
+<h3 id="先说结论"><a href="#先说结论" class="headerlink" title="先说结论"></a>先说结论</h3><p>两个因素造成了这个问题： 1. 隐式的数据向上转换 2. 泛型擦除</p>
+<ol>
+<li><p>隐式数据向上转换：<br> 调用链中数据类型变化：<code>Map&lt;String,Object&gt; ---&gt; Map ---&gt; Object  最后---&gt; Map&lt;String,Object&gt;</code>。问题就是,如果我在转换过程中Map存入的<code>key</code>是<code>Integer</code> 最后为什么会可以转成<code>Map&lt;String,Object&gt;</code>？</p>
+</li>
+<li><p>这个可以用<code>泛型擦除</code>进行解释，运行时JVM不感知你的Map类型，所以在向下强转的时候其实转的是<code>Map&lt;Object,Object&gt;</code> 。<code>keySet()</code>获取的也是<code>Set&lt;Object&gt;</code> 。<strong>但是！！</strong> <code>foreach</code>进行遍历的时候就要去指定类了，根据静态检测编译的结果，你这个位置一定要声明成<code>String</code>的父类才可以，声明成<code>Integer</code>肯定会报<code>编译错误</code>的。当指定一个实际为<code>Map&lt;Integer,Object&gt;</code> 的<code>key</code>为<code>String</code>时就会报<code>java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.String</code>异常了。</p>
+</li>
+</ol>
+<h3 id="调试代码"><a href="#调试代码" class="headerlink" title="调试代码"></a>调试代码</h3><ol>
+<li><p>简单写了一个出现问题的demo。进行上面思路的图文解释<br><img src="https://i.loli.net/2019/07/04/5d1ce4b8c6c3255842.png" alt="小demo"></p>
+</li>
+<li><p>JSONObject 强转成Map类型。注意返回的是Object</p>
+</li>
+</ol>
+<p><img src="https://i.loli.net/2019/07/04/5d1ce4d1de45528363.png" alt="2.1"></p>
+<p><img src="https://i.loli.net/2019/07/04/5d1ce4e28421453210.png" alt="2.2"></p>
+<p><img src="https://i.loli.net/2019/07/04/5d1ce4ef26d3540330.png" alt="2.3"></p>
+<ol start="3">
+<li>断点位置获取的key = Integer </li>
+</ol>
+<p><img src="https://i.loli.net/2019/07/04/5d1ce500dc14460917.png" alt="3"></p>
+<ol start="4">
+<li>存入之前的map。因为泛型类型被强转没了，所以可以存入</li>
+</ol>
+<p><img src="https://i.loli.net/2019/07/04/5d1ce535ac5d746962.png" alt="4"></p>
+<ol start="5">
+<li>返回结过 <code>object(或者说map)</code> –&gt;向下强转 <code>JSONObject</code> 。由于JVM的泛型擦除，在运行时是没有任何泛型标识的，所以可以强转成功。JSONObject中的map其实是<code>Map&lt;Object,Object&gt;</code><br><img src="https://i.loli.net/2019/07/04/5d1ce55171b3515352.png" alt="5"></li>
+</ol>
+<ol start="6">
+<li>然后在调用<code>keySet()</code>时候也是没有问题的，同样因为泛型擦除变成了<code>Set&lt;Object&gt;</code>的原因。 但是foreach时候就不一样了，foreach是要指定类型的，但是因为我们的强转，导致运行时的类型已经不再是我们声明的类型了。所以编译没有保存但是运行报错了。</li>
+</ol>
+<p><img src="https://i.loli.net/2019/07/04/5d1ce57d1068952924.png" alt="6"></p>
+<h3 id="最后，放一个可以复现Demo"><a href="#最后，放一个可以复现Demo" class="headerlink" title="最后，放一个可以复现Demo"></a>最后，放一个可以复现Demo</h3><h4 id="简易版demo-可以躲过静态类型检查，但运行报转换异常"><a href="#简易版demo-可以躲过静态类型检查，但运行报转换异常" class="headerlink" title="简易版demo 可以躲过静态类型检查，但运行报转换异常"></a>简易版demo 可以躲过静态类型检查，但运行报转换异常</h4><pre class="line-numbers language-java"><code class="language-java">    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        HashMap<span class="token operator">&lt;</span>String<span class="token punctuation">,</span>Object<span class="token operator">></span> map <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Object object <span class="token operator">=</span> <span class="token function">parse</span><span class="token punctuation">(</span>map<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 2️⃣ 类型第二次强转</span>
+        HashMap<span class="token operator">&lt;</span>String<span class="token punctuation">,</span>Object<span class="token operator">></span> map2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>object <span class="token keyword">instanceof</span> <span class="token class-name">HashMap</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            map2 <span class="token operator">=</span> <span class="token punctuation">(</span>HashMap<span class="token punctuation">)</span>object<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 3️⃣ 类型第三次强转</span>
+        <span class="token punctuation">}</span>
+        map2<span class="token punctuation">.</span><span class="token function">keySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 这里并没有报异常</span>
+<span class="token comment" spellcheck="true">//        for (Object x: map2.keySet()) { // 正确的代码。</span>
+<span class="token comment" spellcheck="true">//            System.out.println(x);</span>
+<span class="token comment" spellcheck="true">//        }</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>String x<span class="token operator">:</span> map2<span class="token punctuation">.</span><span class="token function">keySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// 错误的代码。编译没报错，因为自己声明的时候key的类型就是String。 但是因为我们的向上强转，导致存入的是Integer(Object)</span>
+            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+​
+    <span class="token keyword">public</span> <span class="token keyword">static</span> Object <span class="token function">parse</span><span class="token punctuation">(</span><span class="token keyword">final</span> Map map<span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// 1️⃣类型第一次强转</span>
+        map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token number">123</span><span class="token punctuation">,</span><span class="token string">"64"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">,</span><span class="token string">"64"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> map<span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ol>
+<li><p>遍历时候用Object肯定没问题。</p>
+</li>
+<li><p>key尽量用标准的string。</p>
+</li>
+<li><p>打开特性开关，让fastjson转化key的类型为string。下面是一个demo:</p>
+<pre class="line-numbers language-java"><code class="language-java">JSONObject jsonObject <span class="token operator">=</span>JSON<span class="token punctuation">.</span><span class="token function">parseObject</span><span class="token punctuation">(</span><span class="token string">"{64:\"64\"}"</span><span class="token punctuation">,</span>Feature<span class="token punctuation">.</span>NonStringKeyAsString<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//开启转换开关。</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><strong>注：这个开关是在fastjson 1.2.42 时候才出现的，小于这个版本应该都不会出现强转的错误，高于这个版本的需要自己看看key是不是除了String的其他Object类型，是的话就要加上这个开关了。</strong><br><img src="https://i.loli.net/2019/07/04/5d1ce5e861cdb40435.png" alt="注"></p>
+</li>
+</ol>
 
 					
 				</div>
@@ -200,14 +227,14 @@
 		<ul class="am-pagination">
     
     	<li class="am-pagination-prev">
-   		<a class="pull-left" href="/2019/04/27/java-runtime-execute-inputstream-blocking/" title="项目中java创建子进程造成的I/O阻塞问题定位和解决">
+   		<a class="pull-left" href="/2019/07/11/lambda-in-java/" title="一个lambda的表达式是如何在java中执行的">
       		&laquo; 上一篇
 		</a>
 		</li>
 	
 	
 		<li class="am-pagination-next">
-		<a class="pull-right" href="/2019/03/10/filezip-cause-jvm-crush-md/" title="FileZip导致的JVM崩溃问题分析">
+		<a class="pull-right" href="/2019/06/04/2019booklist/" title="2019年看过的书单呀">
 			下一篇 &raquo;
 		</a>
 		</li>
@@ -336,7 +363,7 @@
 				
 				
 				<!--toc(post.content)-->
-				<ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#什么是装箱和拆箱？"><span class="post-toc-text">什么是装箱和拆箱？</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#对应的API-以Integer为例："><span class="post-toc-text">对应的API,以Integer为例：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Java可以做到自动拆箱和装箱"><span class="post-toc-text">Java可以做到自动拆箱和装箱</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#总结几个混合使用的要点"><span class="post-toc-text">总结几个混合使用的要点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#一些简单的测试用例进行解释整个-int和Integer进行比较的总结："><span class="post-toc-text">一些简单的测试用例进行解释整个 int和Integer进行比较的总结：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#具体的几个测试用例"><span class="post-toc-text">具体的几个测试用例</span></a></li></ol></li></ol>
+				<ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题起因"><span class="post-toc-text">问题起因</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#我的问题"><span class="post-toc-text">我的问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#先说结论"><span class="post-toc-text">先说结论</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#调试代码"><span class="post-toc-text">调试代码</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#最后，放一个可以复现Demo"><span class="post-toc-text">最后，放一个可以复现Demo</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#简易版demo-可以躲过静态类型检查，但运行报转换异常"><span class="post-toc-text">简易版demo 可以躲过静态类型检查，但运行报转换异常</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#解决方案"><span class="post-toc-text">解决方案</span></a></li></ol></li></ol>
 			</nav>
 			<div class="post-toc-bar"><div>
 		</div></div></aside>
