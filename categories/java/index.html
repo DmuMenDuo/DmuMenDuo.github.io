@@ -30,11 +30,11 @@
 <link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 	<body>	
 		<!--Preloader-->
-<div id="preloader">
+<!-- <div id="preloader">
 	<div id="status">
 		<img alt="PRELOADER" src="/img/logo.png">
 	</div>
-</div>
+</div> -->
 <!--Preloader end-->
 
 <!-- header -->	
@@ -601,7 +601,23 @@
 	</body>
 	</html>
 
-= 'auto') {
+             return resultRight.searchTextCount - resultLeft.searchTextCount;
+            } else if (resultLeft.hitCount !== resultRight.hitCount) {
+              return resultRight.hitCount - resultLeft.hitCount;
+            } else {
+              return resultRight.id - resultLeft.id;
+            }
+          });
+          var searchResultList = '<ul class=\"search-result-list\">';
+          resultItems.forEach(function (result) {
+            searchResultList += result.item;
+          })
+          searchResultList += "</ul>";
+          resultContent.innerHTML = searchResultList;
+        }
+      }
+
+      if ('auto' === 'auto') {
         input.addEventListener('input', inputEventFunction);
       } else {
         $('.search-icon').click(inputEventFunction);
