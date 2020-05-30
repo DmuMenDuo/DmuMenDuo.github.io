@@ -9,7 +9,7 @@
 	<html>
 		
 
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
 	<title>一个lambda的表达式是如何在java中执行的</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -524,7 +524,7 @@ BootstrapMethods<span class="token operator">:</span>
 				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-一个lambda函数是如何被执行的："><span class="post-toc-text">1.一个lambda函数是如何被执行的：</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-1一个简单的demo源代码如下："><span class="post-toc-text">1.1一个简单的demo源代码如下：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-2编译阶段：三个需要注意的点"><span class="post-toc-text">1.2编译阶段：三个需要注意的点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-3执行阶段："><span class="post-toc-text">1.3执行阶段：</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#2-相关的知识点"><span class="post-toc-text">2.相关的知识点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-1-方法句柄：MethodHandle"><span class="post-toc-text">2.1 方法句柄：MethodHandle</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-1-MethodHandle作用"><span class="post-toc-text">2.1.1 MethodHandle作用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-2-MethodHandle和反射拿到方法之间的不同"><span class="post-toc-text">2.1.2 MethodHandle和反射拿到方法之间的不同</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-3-MethodHandle使用"><span class="post-toc-text">2.1.3 MethodHandle使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-2-字节码生成：ASM"><span class="post-toc-text">2.2 字节码生成：ASM</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-2-1-ASM框架："><span class="post-toc-text">2.2.1 ASM框架：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-2-2-用途："><span class="post-toc-text">2.2.2 用途：</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-3-虚拟机指令：invokedynamic-invokeinterface-invokestatic…"><span class="post-toc-text">2.3 虚拟机指令：invokedynamic, invokeinterface,invokestatic…</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#4-附录：打印完整的字节码文件-javap-p-v-LambdaMain2-class"><span class="post-toc-text">4.附录：打印完整的字节码文件 javap -p -v LambdaMain2.class</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#5-参考"><span class="post-toc-text">5.参考</span></a></li></ol>
 			</nav>
 			<div class="post-toc-bar"><div>
-		</div></div></aside>
+		</aside>
 	
 
 	</div>
@@ -550,10 +550,10 @@ BootstrapMethods<span class="token operator">:</span>
 		</div>
 	</div>
 
-	<div class="blog-text-center">
+	<div  class="blog-text-center">
 		<div class="theme-annie-copyright">
 			
-				&copy; 2017 - 2019, content by men duo. All Rights Reserved.			       	
+				&copy; 2017 - 2020, content by men duo. All Rights Reserved.			       	
 			
 		</div>
 	</div>

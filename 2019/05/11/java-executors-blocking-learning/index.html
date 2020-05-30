@@ -9,7 +9,7 @@
 	<html>
 		
 
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
 	<title>线程池中的阻塞队列知识点总结</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -527,7 +527,7 @@
 				<ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#线程池中的阻塞队列知识点总结"><span class="post-toc-text">线程池中的阻塞队列知识点总结</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#几种阻塞队列简要介绍"><span class="post-toc-text">几种阻塞队列简要介绍</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#线程池中的阻塞队列的一些思考"><span class="post-toc-text">线程池中的阻塞队列的一些思考</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-线程池中的阻塞队列是做什么的？"><span class="post-toc-text">1. 线程池中的阻塞队列是做什么的？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？"><span class="post-toc-text">2. 队列里放入和取出的操作有很多，线程池用了阻塞队列的哪两个方法？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-阻塞队列可以放入Null吗？"><span class="post-toc-text">3. 阻塞队列可以放入Null吗？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-无界阻塞队列长度真的是无大小限制的吗？"><span class="post-toc-text">4. 无界阻塞队列长度真的是无大小限制的吗？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-阻塞队列的put和take如果自己写应该如何实现？"><span class="post-toc-text">5. 阻塞队列的put和take如果自己写应该如何实现？</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#关于SynchronousQueue"><span class="post-toc-text">关于SynchronousQueue</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-理解SynchronousQueue是什么"><span class="post-toc-text">1. 理解SynchronousQueue是什么?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-SynchronousQueue的无锁同步算法"><span class="post-toc-text">2. SynchronousQueue的无锁同步算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-线程池里是如何使用SynchronousQueue"><span class="post-toc-text">3. 线程池里是如何使用SynchronousQueue?</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-1-首先看一下创建CachedThreadPool的工厂方法。默认情况下-核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue"><span class="post-toc-text">3.1. 首先看一下创建CachedThreadPool的工厂方法。默认情况下,核心池大小为0（初始化不创建worker）。核心池设置为最大值。worker存活时间为60s。阻塞队列为SynchronousQueue</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-2-然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况-offer操作一定都是返回false的。线程池如何处理这个offer进来的task的"><span class="post-toc-text">3.2. 然后我一直在想的一个问题是，SynchronousQueue队列长度为0，SynchronousQueue的offer操作如果碰到队列满的情况会直接返回false。所以在线程池工作最开始的时间是没有woker的情况,offer操作一定都是返回false的。线程池如何处理这个offer进来的task的?</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-3-worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？-这个问题蠢吗。。我其实想了好久才想明白的"><span class="post-toc-text">3.3. worker线程处理完一个任务之后也会进行offer操作，所以这个时候它会阻塞住吗？(这个问题蠢吗。。我其实想了好久才想明白的)</span></a></li></ol></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-text">参考资料</span></a></li></ol>
 			</nav>
 			<div class="post-toc-bar"><div>
-		</div></div></aside>
+		</aside>
 	
 
 	</div>
@@ -553,10 +553,10 @@
 		</div>
 	</div>
 
-	<div class="blog-text-center">
+	<div  class="blog-text-center">
 		<div class="theme-annie-copyright">
 			
-				&copy; 2017 - 2019, content by men duo. All Rights Reserved.			       	
+				&copy; 2017 - 2020, content by men duo. All Rights Reserved.			       	
 			
 		</div>
 	</div>

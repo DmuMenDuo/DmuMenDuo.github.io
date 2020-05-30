@@ -9,7 +9,7 @@
 	<html>
 		
 
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
 	<title>TimSort遇到Comparator抛出异常IllegalArgumentException的那些事儿</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -141,13 +141,13 @@
 <p>在 JDK7 版本及以上，Comparator 实现类要满足如下三个条件，不然 Arrays.sort，Collections.sort 会抛 IllegalArgumentException 异常。<br>说明:三个条件如下:<br>1) x，y 的比较结果和 y，x 的比较结果相反。 对称性<br>2) x&gt;y，y&gt;z，则 x&gt;z。传递性<br>3) x=y，则 x，z 比较结果和 y，z 比较结果相同。</p>
 </blockquote>
 <pre class="line-numbers language-Java"><code class="language-Java">    //反例
-    new Comparator<student>() {
+    new Comparator<Student>() {
         @Override
         public int compare(Student o1, Student o2) {
             return o1.getId() > o2.getId() ? 1 : -1;
         }
     }
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></student></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>​</p>
 <h3 id="1-先说结论："><a href="#1-先说结论：" class="headerlink" title="1.先说结论："></a>1.先说结论：</h3><ol>
 <li><p>归并排序过程会出现<code>原数组S</code>中的<code>部分有序数组A</code>和<code>有序数组B</code>, <code>A</code>和<code>B</code>会进行merge成一个<code>整体有序</code>的<code>数组S</code>。</p>
@@ -366,7 +366,7 @@
 				<ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-先说结论："><span class="post-toc-text">1.先说结论：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-参考资料："><span class="post-toc-text">2.参考资料：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-出现原因分析："><span class="post-toc-text">3.出现原因分析：</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-1-TimSort的基本原理："><span class="post-toc-text">3.1 TimSort的基本原理：</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-1-1-二分插入排序"><span class="post-toc-text">3.1.1 二分插入排序</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-1-2-归并排序"><span class="post-toc-text">3.1.2 归并排序</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-最后总结："><span class="post-toc-text">4.最后总结：</span></a></li></ol>
 			</nav>
 			<div class="post-toc-bar"><div>
-		</div></div></aside>
+		</aside>
 	
 
 	</div>
@@ -392,10 +392,10 @@
 		</div>
 	</div>
 
-	<div class="blog-text-center">
+	<div  class="blog-text-center">
 		<div class="theme-annie-copyright">
 			
-				&copy; 2017 - 2019, content by men duo. All Rights Reserved.			       	
+				&copy; 2017 - 2020, content by men duo. All Rights Reserved.			       	
 			
 		</div>
 	</div>
