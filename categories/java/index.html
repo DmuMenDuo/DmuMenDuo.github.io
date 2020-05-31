@@ -10,7 +10,7 @@
 		
 
 <head><meta name="generator" content="Hexo 3.9.0">
-	<title>category: java</title>
+	<title>category: Java</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-title" content="Amaze UI">
@@ -91,7 +91,7 @@
 
 			<div class="blog-text-center">
 				
-					<i class="fa fa-book">java</i>
+					<i class="fa fa-book">Java</i>
 				
 			</div>  
 
@@ -104,29 +104,135 @@
 					
 
 					
-					<!--<a href="/archives/2017" class="archive-year">2017</a>-->
+					<!--<a href="/archives/2019" class="archive-year">2019</a>-->
 				
 								
 				
 					  
 					<div class="archive-year">
-						<a href="/archives/2017/10">
-							2017-10
+						<a href="/archives/2019/08">
+							2019-08
 						</a>
 					</div>				
 				  
 				
 				<div class="archive-item">
 					<div class="archive-post-title">									
-						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">翻译文章:JVM架构简析</a>
+						<a href="/2019/08/04/timsort/" itemprop="url">TimSort遇到Comparator抛出异常IllegalArgumentException的那些事儿</a>
 					</div>
 					<div class="archive-post-time">
-						<a href="/2017/10/10/trans-jvm-structure/" itemprop="url">10-10</a>
+						<a href="/2019/08/04/timsort/" itemprop="url">08-04</a>
+					</div>
+				</div>		        							
+							
+				
+				
+				
+								
+				
+					  
+					<div class="archive-year">
+						<a href="/archives/2019/07">
+							2019-07
+						</a>
+					</div>				
+				  
+				
+				<div class="archive-item">
+					<div class="archive-post-title">									
+						<a href="/2019/07/22/batch-save-intern/" itemprop="url">批量保存的一些思考</a>
+					</div>
+					<div class="archive-post-time">
+						<a href="/2019/07/22/batch-save-intern/" itemprop="url">07-22</a>
+					</div>
+				</div>		        							
+							
+				
+				
+				
+								
+				  
+				
+				<div class="archive-item">
+					<div class="archive-post-title">									
+						<a href="/2019/07/11/lambda-in-java/" itemprop="url">一个lambda的表达式是如何在java中执行的</a>
+					</div>
+					<div class="archive-post-time">
+						<a href="/2019/07/11/lambda-in-java/" itemprop="url">07-11</a>
+					</div>
+				</div>		        							
+							
+				
+				
+				
+								
+				  
+				
+				<div class="archive-item">
+					<div class="archive-post-title">									
+						<a href="/2019/07/04/fastjson-update-sdk-bug/" itemprop="url">fastjson升级版本引发bug的思考</a>
+					</div>
+					<div class="archive-post-time">
+						<a href="/2019/07/04/fastjson-update-sdk-bug/" itemprop="url">07-04</a>
+					</div>
+				</div>		        							
+							
+				
+				
+				
+								
+				
+					  
+					<div class="archive-year">
+						<a href="/archives/2019/05">
+							2019-05
+						</a>
+					</div>				
+				  
+				
+				<div class="archive-item">
+					<div class="archive-post-title">									
+						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">线程池中的阻塞队列知识点总结</a>
+					</div>
+					<div class="archive-post-time">
+						<a href="/2019/05/11/java-executors-blocking-learning/" itemprop="url">05-11</a>
+					</div>
+				</div>		        							
+							
+				
+				
+				
+								
+				
+					  
+					<div class="archive-year">
+						<a href="/archives/2019/04">
+							2019-04
+						</a>
+					</div>				
+				  
+				
+				<div class="archive-item">
+					<div class="archive-post-title">									
+						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">项目中java创建子进程造成的I/O阻塞问题定位和解决</a>
+					</div>
+					<div class="archive-post-time">
+						<a href="/2019/04/27/java-runtime-execute-inputstream-blocking/" itemprop="url">04-27</a>
 					</div>
 				</div>		        							
 			
 				
-			    
+			
+	<ul class="am-pagination">
+		
+		
+		
+			<li class="am-pagination-next">
+				<a href="/categories/Java/page/2/"> 下一页 &raquo; </a>
+			</li>
+		
+	</ul>
+    
 		</div>
 	</div>
 </div>
@@ -490,118 +596,6 @@
           resultItems.sort(function (resultLeft, resultRight) {
             if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
               return resultRight.searchTextCount - resultLeft.searchTextCount;
-            } else if (resultLeft.hitCount !== resultRight.hitCount) {
-              return resultRight.hitCount - resultLeft.hitCount;
-            } else {
-              return resultRight.id - resultLeft.id;
-            }
-          });
-          var searchResultList = '<ul class=\"search-result-list\">';
-          resultItems.forEach(function (result) {
-            searchResultList += result.item;
-          })
-          searchResultList += "</ul>";
-          resultContent.innerHTML = searchResultList;
-        }
-      }
-
-      if ('auto' === 'auto') {
-        input.addEventListener('input', inputEventFunction);
-      } else {
-        $('.search-icon').click(inputEventFunction);
-        input.addEventListener('keypress', function (event) {
-          if (event.keyCode === 13) {
-            inputEventFunction();
-          }
-        });
-      }
-
-      // remove loading animation
-      $('body').css('overflow', '');
-
-      proceedsearch();
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        $('.sb-close').click();
-        searchFunc('local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
-      }
-    });
-  </script>
-
-
-
-
-
-	<script type="text/javascript" src="/js/love.js"></script>
-
-
-
-
-<script type="text/javascript" src="/js/main.js"></script>
-
-<script type="text/javascript">
-	//generate a random img that pre_name 'from 0 to 110'
-	//var random_bg = Math.floor(Math.random() * 9 + 1);
-
-	//var bg = 'url(/img/random/' + random_bg + '.jpg)';		
-	//var bg = 'url(' + 2 + '.jpg)';
-
-	//$("#header-bg-2").css("background-image", bg);
-</script>
-		
-		<!--back to top-->
-        <style type="text/css">
-	#totop {
-		background: white;
-		border-radius: 50%;
-		position: fixed;
-		right: 5.4%;
-		bottom: 80px;
-		cursor: pointer;
-	}
-	
-	#totop a {
-		color: #474747;
-		background-color: transparent;
-		padding: 10px;
-		text-decoration: none;
-	}
-	
-	@media(max-width:512px) {
-		#totop {
-			display: none;
-			visibility: hidden;
-		}
-	}
-</style>
-
-
-	<div id="totop">
-  		<a href="javascript:;" class="fa fa-arrow-up"></a>
-	</div>
-
-	</body>
-	</html>
-
-             return resultRight.searchTextCount - resultLeft.searchTextCount;
             } else if (resultLeft.hitCount !== resultRight.hitCount) {
               return resultRight.hitCount - resultLeft.hitCount;
             } else {
